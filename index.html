@@ -767,15 +767,44 @@
           <ul class="log-list" id="log-list"></ul>
         </div>
       </section>
+
+      <!-- PANEL HISTÓRICO -->
+      <section class="panel" style="grid-column: 1 / -1;">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Histórico de variables</div>
+            <div class="panel-subtitle">Últimos días desde Supabase (bridge Node)</div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-outline" id="btn-hist-1d">Últimas 24 h</button>
+            <button class="btn btn-outline active" id="btn-hist-3d">Últimos 3 días</button>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1.1fr 1.1fr; gap: 0.8rem;">
+          <div class="metric-card" style="height: 260px;">
+            <div class="metric-label">Temperatura y humedad relativa</div>
+            <canvas id="chart-tair-rh"></canvas>
+          </div>
+
+          <div class="metric-card" style="height: 260px;">
+            <div class="metric-label">Humedad de suelo S1, S2, S3</div>
+            <canvas id="chart-soil"></canvas>
+          </div>
+        </div>
+      </section>
     </main>
 
     <footer>
       <span>HMI Web – Prototipo piloto 3 sectores (90–120 m²).</span>
-      <span>Conectar a ESP32 vía MQTT (topic riego/estado y riego/cmd).</span>
+      <span>Conectar a ESP32 vía MQTT (topic riego/estado y riego/cmd) + histórico vía Supabase.</span>
     </footer>
   </div>
 
+  <!-- MQTT (browser) -->
   <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+  <!-- Chart.js para gráficas -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <script>
     const state = {
@@ -801,6 +830,17 @@
     let mqttConnected = false;
     let lastEspUpdate = 0;
     const ESP_TIMEOUT_MS = 15000;
+
+    // ====== HISTÓRICO / CHARTS ======
+    // Para pruebas locales con el bridge: abrir este HTML como file://
+    // y usar localhost. Cuando subas el bridge a un hosting HTTPS, cambia aquí.
+    const HISTORY_API_BASE =
+      (location.protocol === "file:" || location.hostname === "localhost")
+        ? "http://localhost:3000"
+        : "https://TU_BACKEND_URL"; // <-- cambiar cuando publiques el Node
+
+    let chartTairRh = null;
+    let chartSoil   = null;
 
     const chipDot   = document.getElementById("chip-dot");
     const chipLabel = document.getElementById("chip-label");
@@ -1099,8 +1139,8 @@
     function setupMqtt() {
       const isHttps = (location.protocol === "https:");
       const host = isHttps
-        ? "wss://broker.emqx.io:8084/mqtt"   // cuando la HMI esté publicada en HTTPS
-        : "ws://broker.emqx.io:8083/mqtt";   // cuando la abras local (file:///)
+        ? "wss://broker.emqx.io:8084/mqtt"
+        : "ws://broker.emqx.io:8083/mqtt";
 
       const options = {
         clean: true,
@@ -1298,7 +1338,7 @@
           level: "LOW",
         },
         {
-          text: "Sensor BH1750 sin respuesta.",
+          text: "Sensor de radiación sin respuesta.",
           level: "WARN",
         },
       ];
@@ -1319,6 +1359,127 @@
       logList.innerHTML = "";
     });
 
+    // ====== HISTÓRICO / CHARTS ======
+    function formatTsLabel(ts) {
+      const d = new Date(ts);
+      const dd = String(d.getDate()).padStart(2, "0");
+      const hh = String(d.getHours()).padStart(2, "0");
+      const mm = String(d.getMinutes()).padStart(2, "0");
+      return `${dd} ${hh}:${mm}`;
+    }
+
+    async function loadHistory(days = 3) {
+      try {
+        if (!HISTORY_API_BASE || HISTORY_API_BASE.includes("TU_BACKEND_URL")) {
+          logEvent("HIST: base URL no configurada para histórico.");
+          return;
+        }
+
+        const url = `${HISTORY_API_BASE}/api/historial?dias=${days}`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const json = await res.json();
+
+        if (!json.data || !json.data.length) {
+          logEvent(`Histórico vacío (últimos ${days} día(s)).`);
+          return;
+        }
+
+        const labels = json.data.map(row => formatTsLabel(row.ts));
+        const tair  = json.data.map(row => row.tair);
+        const rh    = json.data.map(row => row.rh);
+        const soil1 = json.data.map(row => row.soil1);
+        const soil2 = json.data.map(row => row.soil2);
+        const soil3 = json.data.map(row => row.soil3);
+
+        const ctx1 = document.getElementById("chart-tair-rh").getContext("2d");
+        if (!chartTairRh) {
+          chartTairRh = new Chart(ctx1, {
+            type: "line",
+            data: {
+              labels,
+              datasets: [
+                {
+                  label: "Tair (°C)",
+                  data: tair,
+                  borderWidth: 1,
+                  tension: 0.2,
+                },
+                {
+                  label: "RH (%)",
+                  data: rh,
+                  borderWidth: 1,
+                  tension: 0.2,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                x: {
+                  ticks: { maxTicksLimit: 8 },
+                },
+                y: {
+                  title: { display: true, text: "Magnitud" },
+                },
+              },
+              plugins: {
+                legend: { position: "bottom" },
+              },
+            },
+          });
+        } else {
+          chartTairRh.data.labels = labels;
+          chartTairRh.data.datasets[0].data = tair;
+          chartTairRh.data.datasets[1].data = rh;
+          chartTairRh.update();
+        }
+
+        const ctx2 = document.getElementById("chart-soil").getContext("2d");
+        if (!chartSoil) {
+          chartSoil = new Chart(ctx2, {
+            type: "line",
+            data: {
+              labels,
+              datasets: [
+                { label: "Suelo S1 (%)", data: soil1, borderWidth: 1, tension: 0.2 },
+                { label: "Suelo S2 (%)", data: soil2, borderWidth: 1, tension: 0.2 },
+                { label: "Suelo S3 (%)", data: soil3, borderWidth: 1, tension: 0.2 },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                x: {
+                  ticks: { maxTicksLimit: 8 },
+                },
+                y: {
+                  title: { display: true, text: "%" },
+                },
+              },
+              plugins: {
+                legend: { position: "bottom" },
+              },
+            },
+          });
+        } else {
+          chartSoil.data.labels = labels;
+          chartSoil.data.datasets[0].data = soil1;
+          chartSoil.data.datasets[1].data = soil2;
+          chartSoil.data.datasets[2].data = soil3;
+          chartSoil.update();
+        }
+
+        logEvent(`Histórico cargado (${days} día(s), ${json.count} muestras).`);
+
+      } catch (err) {
+        console.error("Error cargando histórico:", err);
+        logEvent("Error al cargar histórico: " + err.message);
+      }
+    }
+
     function init() {
       refreshHeader();
       refreshButtons();
@@ -1326,9 +1487,30 @@
       updateIndicators();
       renderAlarms();
       updateConnectionIndicator();
+
       logEvent("HMI de riego cargada. Conectando a MQTT…");
       setupMqtt();
       setInterval(updateConnectionIndicator, 2000);
+
+      // Histórico
+      const btnHist1d = document.getElementById("btn-hist-1d");
+      const btnHist3d = document.getElementById("btn-hist-3d");
+
+      if (btnHist1d && btnHist3d) {
+        btnHist1d.addEventListener("click", () => {
+          btnHist1d.classList.add("active");
+          btnHist3d.classList.remove("active");
+          loadHistory(1);
+        });
+        btnHist3d.addEventListener("click", () => {
+          btnHist3d.classList.add("active");
+          btnHist1d.classList.remove("active");
+          loadHistory(3);
+        });
+
+        // carga inicial
+        loadHistory(3);
+      }
     }
 
     init();
