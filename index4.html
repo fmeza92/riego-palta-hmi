@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>HMI Web - Riego Inteligente Palta Fuerte (Cañete)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --bg: #0f172a;
+      --bg-alt: #111827;
+      --card: #1f2937;
+      --accent: #22c55e;
+      --accent-soft: rgba(34, 197, 94, 0.15);
+      --danger: #ef4444;
+      --danger-soft: rgba(239, 68, 68, 0.15);
+      --text: #e5e7eb;
+      --text-soft: #9ca3af;
+      --border: #374151;
+      --warning: #f59e0b;
+      --warning-soft: rgba(245, 158, 11, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+    }
+
+    body {
+      background: radial-gradient(circle at top, #1e293b 0, #020617 50%, #000 100%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+    }
+
+    .app {
+      max-width: 1200px;
+      width: 100%;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(135deg, #020617, #111827);
+      padding: 1rem 1.5rem;
+      border-radius: 1rem;
+      border: 1px solid var(--border);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    header .title-block {
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+    }
+
+    header h1 {
+      font-size: 1.1rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text);
+    }
+
+    header h2 {
+      font-size: 0.85rem;
+      color: var(--text-soft);
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.2rem 0.7rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      font-size: 0.75rem;
+      color: var(--text-soft);
+      background: rgba(15, 23, 42, 0.9);
+    }
+
+    .chip-dot {
+      width: 0.55rem;
+      height: 0.55rem;
+      border-radius: 999px;
+      background: var(--danger);
+      box-shadow: 0 0 12px var(--danger-soft);
+    }
+
+    .chip-dot.on {
+      background: var(--accent);
+      box-shadow: 0 0 14px var(--accent-soft);
+    }
+
+    .chip-label {
+      font-weight: 500;
+    }
+
+    .conn-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.75rem;
+      color: var(--text-soft);
+    }
+
+    .conn-led {
+      width: 0.55rem;
+      height: 0.55rem;
+      border-radius: 999px;
+      background: #4b5563;
+      box-shadow: 0 0 0 rgba(0,0,0,0);
+    }
+
+    .conn-led.ok {
+      background: var(--accent);
+      box-shadow: 0 0 10px var(--accent-soft);
+    }
+
+    .conn-led.warn {
+      background: var(--warning);
+      box-shadow: 0 0 10px var(--warning-soft);
+    }
+
+    .conn-led.off {
+      background: var(--danger);
+      box-shadow: 0 0 10px var(--danger-soft);
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: 1.1fr 1.2fr 1.1fr;
+      gap: 1rem;
+    }
+
+    @media (max-width: 960px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background: rgba(15, 23, 42, 0.96);
+      border-radius: 1rem;
+      border: 1px solid var(--border);
+      padding: 1rem;
+      box-shadow: 0 16px 35px rgba(0, 0, 0, 0.6);
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.2rem;
+    }
+
+    .panel-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--text-soft);
+    }
+
+    .panel-subtitle {
+      font-size: 0.75rem;
+      color: var(--text-soft);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.05rem 0.5rem;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      border: 1px solid var(--border);
+      color: var(--text-soft);
+    }
+
+    .badge-auto {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .badge-manual {
+      border-color: var(--warning);
+      color: var(--warning);
+      background: var(--warning-soft);
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.6rem;
+    }
+
+    .metric-card {
+      background: #020617;
+      border-radius: 0.8rem;
+      border: 1px solid var(--border);
+      padding: 0.6rem 0.7rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .metric-label {
+      font-size: 0.7rem;
+      color: var(--text-soft);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .metric-value {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .metric-unit {
+      font-size: 0.75rem;
+      color: var(--text-soft);
+      margin-left: 0.2rem;
+    }
+
+    .metric-status {
+      font-size: 0.7rem;
+      color: var(--accent);
+    }
+
+    .metric-status.bad {
+      color: var(--danger);
+    }
+
+    .metric-status.warn {
+      color: var(--warning);
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+    }
+
+    .btn {
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      padding: 0.45rem 0.9rem;
+      font-size: 0.8rem;
+      background: #020617;
+      color: var(--text);
+      cursor: pointer;
+      transition: transform 0.08s ease, box-shadow 0.08s ease,
+        background 0.08s ease, border 0.08s ease, color 0.08s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      user-select: none;
+    }
+
+    .btn span.dot {
+      width: 0.55rem;
+      height: 0.55rem;
+      border-radius: 999px;
+      background: var(--border);
+    }
+
+    .btn-primary {
+      border-color: var(--accent);
+    }
+
+    .btn-primary.active {
+      background: var(--accent);
+      color: #022c22;
+      box-shadow: 0 0 16px var(--accent-soft);
+    }
+
+    .btn-primary.active span.dot {
+      background: #022c22;
+    }
+
+    .btn-outline {
+      background: transparent;
+    }
+
+    .btn-outline.active {
+      background: rgba(148, 163, 184, 0.12);
+      border-color: var(--accent);
+      box-shadow: 0 0 18px rgba(148, 163, 184, 0.4);
+    }
+
+    .btn-danger {
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    .btn-danger.active {
+      background: var(--danger);
+      color: #7f1d1d;
+      box-shadow: 0 0 14px var(--danger-soft);
+    }
+
+    .btn:active {
+      transform: translateY(1px) scale(0.99);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.7);
+    }
+
+    .btn.disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .btn.disabled:active {
+      transform: none;
+    }
+
+    .mode-switch {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .actuator-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .actuator-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.55rem 0.6rem;
+      border-radius: 0.7rem;
+      border: 1px solid var(--border);
+      background: #020617;
+    }
+
+    .actuator-label {
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .actuator-desc {
+      font-size: 0.7rem;
+      color: var(--text-soft);
+    }
+
+    .setpoint-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      margin-top: 0.4rem;
+    }
+
+    .setpoint-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.4rem;
+    }
+
+    .setpoint-label {
+      font-size: 0.75rem;
+      color: var(--text-soft);
+    }
+
+    .setpoint-controls {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .setpoint-value {
+      min-width: 4.2rem;
+      text-align: center;
+      font-size: 0.8rem;
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.5rem;
+      border: 1px solid var(--border);
+      background: #020617;
+    }
+
+    .btn-icon {
+      width: 1.5rem;
+      height: 1.5rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-soft);
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: 0.08s ease;
+    }
+
+    .btn-icon:active {
+      transform: translateY(1px) scale(0.97);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6);
+    }
+
+    .log-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      margin-top: 0.3rem;
+    }
+
+    .log-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      color: var(--text-soft);
+    }
+
+    .log-list {
+      list-style: none;
+      border-radius: 0.6rem;
+      border: 1px solid var(--border);
+      background: #020617;
+      padding: 0.4rem 0.5rem;
+      max-height: 170px;
+      overflow-y: auto;
+      font-size: 0.75rem;
+    }
+
+    .log-item {
+      padding: 0.18rem 0;
+      display: flex;
+      justify-content: space-between;
+      gap: 0.4rem;
+      border-bottom: 1px dashed rgba(55, 65, 81, 0.4);
+    }
+
+    .log-item:last-child {
+      border-bottom: none;
+    }
+
+    .log-time {
+      color: var(--text-soft);
+      min-width: 3.1rem;
+    }
+
+    .log-text {
+      flex: 1;
+    }
+
+    .alarm-list {
+      list-style: none;
+      border-radius: 0.6rem;
+      border: 1px solid var(--border);
+      background: #020617;
+      padding: 0.4rem 0.5rem;
+      max-height: 120px;
+      overflow-y: auto;
+      font-size: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .alarm-empty {
+      color: var(--text-soft);
+      font-size: 0.75rem;
+    }
+
+    .alarm-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.2rem 0.25rem;
+      border-radius: 0.4rem;
+      background: var(--danger-soft);
+      border: 1px solid rgba(248, 113, 113, 0.6);
+      gap: 0.4rem;
+    }
+
+    .alarm-text {
+      flex: 1;
+    }
+
+    .alarm-level {
+      font-size: 0.7rem;
+      color: var(--danger);
+      font-weight: 600;
+    }
+
+    footer {
+      margin-top: 0.2rem;
+      font-size: 0.7rem;
+      color: var(--text-soft);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="title-block">
+        <h1>Sistema de Riego Inteligente – Palta Fuerte</h1>
+        <h2>Parcela piloto sectorizada – Cañete (ESP32 + IoT)</h2>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 0.4rem; align-items: flex-end;">
+        <div class="chip" id="chip-estado">
+          <span class="chip-dot" id="chip-dot"></span>
+          <span class="chip-label" id="chip-label">Control detenido</span>
+        </div>
+        <div id="mode-label" style="font-size: 0.75rem; color: var(--text-soft);">
+          Modo actual: Manual
+        </div>
+        <div class="conn-indicator">
+          <span class="conn-led off" id="conn-led"></span>
+          <span class="conn-text" id="conn-text">Sin conexión MQTT</span>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <!-- PANEL IZQUIERDO: MONITOREO -->
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Monitoreo en Tiempo Real</div>
+            <div class="panel-subtitle">Microclima y humedad de suelo</div>
+          </div>
+          <span class="badge">Datos desde ESP32</span>
+        </div>
+
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-label">Temperatura aire</div>
+            <div>
+              <span class="metric-value" id="tair-value">24.5</span>
+              <span class="metric-unit">°C</span>
+            </div>
+            <div class="metric-status" id="tair-status">Rango óptimo</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-label">Humedad relativa</div>
+            <div>
+              <span class="metric-value" id="rh-value">62</span>
+              <span class="metric-unit">%</span>
+            </div>
+            <div class="metric-status warn" id="rh-status">Cercano al límite</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-label">Déficit de presión de vapor (VPD)</div>
+            <div>
+              <span class="metric-value" id="vpd-value">0.95</span>
+              <span class="metric-unit">kPa</span>
+            </div>
+            <div class="metric-status" id="vpd-status">En banda</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-label">Radiación en canopia</div>
+            <div>
+              <span class="metric-value" id="rad-value">42000</span>
+              <span class="metric-unit">lux</span>
+            </div>
+            <div class="metric-status" id="rad-status">Riego habilitado</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-label">Humedad suelo S1</div>
+            <div>
+              <span class="metric-value" id="soil1-value">38</span>
+              <span class="metric-unit">%</span>
+            </div>
+            <div class="metric-status" id="soil1-status">Dentro de banda</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-label">Humedad suelo S2</div>
+            <div>
+              <span class="metric-value" id="soil2-value">31</span>
+              <span class="metric-unit">%</span>
+            </div>
+            <div class="metric-status bad" id="soil2-status">Suelo seco</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-label">Humedad suelo S3</div>
+            <div>
+              <span class="metric-value" id="soil3-value">55</span>
+              <span class="metric-unit">%</span>
+            </div>
+            <div class="metric-status" id="soil3-status">En banda</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-label">Estado general</div>
+            <div class="metric-value" id="system-state-text">
+              Detenido
+            </div>
+            <div class="metric-status" id="system-status-msg">Esperando inicio</div>
+          </div>
+        </div>
+
+        <!-- SETPOINTS -->
+        <div class="setpoint-group">
+          <div class="setpoint-row">
+            <span class="setpoint-label">Banda VPD (mín / máx)</span>
+            <div class="setpoint-controls">
+              <button class="btn-icon" data-sp="vpdMin" data-delta="-0.05">-</button>
+              <span class="setpoint-value" id="sp-vpdMin">0.60 kPa</span>
+              <button class="btn-icon" data-sp="vpdMin" data-delta="0.05">+</button>
+              <button class="btn-icon" data-sp="vpdMax" data-delta="-0.05">-</button>
+              <span class="setpoint-value" id="sp-vpdMax">1.20 kPa</span>
+              <button class="btn-icon" data-sp="vpdMax" data-delta="0.05">+</button>
+            </div>
+          </div>
+
+          <div class="setpoint-row">
+            <span class="setpoint-label">Humedad suelo (mín / máx)</span>
+            <div class="setpoint-controls">
+              <button class="btn-icon" data-sp="soilMin" data-delta="-1">-</button>
+              <span class="setpoint-value" id="sp-soilMin">30 %</span>
+              <button class="btn-icon" data-sp="soilMin" data-delta="1">+</button>
+              <button class="btn-icon" data-sp="soilMax" data-delta="-1">-</button>
+              <span class="setpoint-value" id="sp-soilMax">60 %</span>
+              <button class="btn-icon" data-sp="soilMax" data-delta="1">+</button>
+            </div>
+          </div>
+
+          <div class="setpoint-row">
+            <span class="setpoint-label">Radiación máxima para riego</span>
+            <div class="setpoint-controls">
+              <button class="btn-icon" data-sp="radMax" data-delta="-2000">-</button>
+              <span class="setpoint-value" id="sp-radMax">60000 lux</span>
+              <button class="btn-icon" data-sp="radMax" data-delta="2000">+</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PANEL CENTRAL -->
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Control Principal</div>
+            <div class="panel-subtitle">
+              Modo de operación y lógica sectorizada VPD + humedad de suelo
+            </div>
+          </div>
+        </div>
+
+        <div class="btn-row" style="margin-bottom: 0.4rem;">
+          <button class="btn btn-primary" id="btn-power">
+            <span class="dot"></span>
+            <span id="power-label">Activar control automático</span>
+          </button>
+
+          <button class="btn btn-danger" id="btn-emg">
+            <span class="dot"></span>
+            Paro de emergencia
+          </button>
+        </div>
+
+        <div style="margin-top: 0.4rem;">
+          <div class="panel-subtitle" style="margin-bottom: 0.35rem;">
+            Selección de modo (global)
+          </div>
+          <div class="mode-switch">
+            <button class="btn btn-outline active" id="btn-mode-man">
+              Manual
+            </button>
+            <button class="btn btn-outline" id="btn-mode-auto">
+              Automático
+            </button>
+          </div>
+        </div>
+
+        <div style="margin-top: 0.8rem;">
+          <div class="panel-subtitle" style="margin-bottom: 0.25rem;">
+            Alarmas activas (sensores, VPD y riego)
+          </div>
+          <ul class="alarm-list" id="alarm-list">
+            <li class="alarm-empty">Sin alarmas activas.</li>
+          </ul>
+          <div class="btn-row" style="margin-top: 0.45rem; justify-content: flex-end;">
+            <button class="btn btn-outline" id="btn-add-fake-alarm">
+              Generar alarma de prueba
+            </button>
+            <button class="btn btn-outline" id="btn-ack-alarms">
+              Reconocer todas
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PANEL DERECHO -->
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Control de Sectores</div>
+            <div class="panel-subtitle">Válvulas de riego Sector 1, 2 y 3</div>
+          </div>
+          <span class="badge badge-manual" id="badge-mode">
+            Manual
+          </span>
+        </div>
+
+        <div class="actuator-list">
+          <div class="actuator-item">
+            <div>
+              <div class="actuator-label">Válvula Sector 1</div>
+              <div class="actuator-desc">Hilera 1 (10 m aprox.)</div>
+            </div>
+            <button class="btn btn-outline actuator-btn" data-act="s1">
+              OFF
+            </button>
+          </div>
+
+          <div class="actuator-item">
+            <div>
+              <div class="actuator-label">Válvula Sector 2</div>
+              <div class="actuator-desc">Hilera 2 (10 m aprox.)</div>
+            </div>
+            <button class="btn btn-outline actuator-btn" data-act="s2">
+              OFF
+            </button>
+          </div>
+
+          <div class="actuator-item">
+            <div>
+              <div class="actuator-label">Válvula Sector 3</div>
+              <div class="actuator-desc">Hilera 3 (10 m aprox.)</div>
+            </div>
+            <button class="btn btn-outline actuator-btn" data-act="s3">
+              OFF
+            </button>
+          </div>
+        </div>
+
+        <div class="log-container">
+          <div class="log-header-row">
+            <span>Eventos recientes</span>
+            <button class="btn btn-outline" id="btn-clear-log">
+              Limpiar log
+            </button>
+          </div>
+          <ul class="log-list" id="log-list"></ul>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span>HMI Web – Prototipo piloto 3 sectores (90–120 m²).</span>
+      <span>Conectar a ESP32 vía MQTT (topic riego/estado y riego/cmd).</span>
+    </footer>
+  </div>
+
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+
+  <script>
+    const state = {
+      systemOn: false,
+      mode: "manual",
+      sectors: { s1: false, s2: false, s3: false },
+      setpoints: {
+        vpdMin: 0.6,
+        vpdMax: 1.2,
+        soilMin: 30,
+        soilMax: 60,
+        radMax: 60000,
+      },
+      tair: 24.5,
+      rh: 62,
+      vpd: 0.95,
+      rad: 42000,
+      soil: [38, 31, 55],
+      alarms: [],
+    };
+
+    let mqttClient = null;
+    let mqttConnected = false;
+    let lastEspUpdate = 0;
+    const ESP_TIMEOUT_MS = 15000;
+
+    const chipDot   = document.getElementById("chip-dot");
+    const chipLabel = document.getElementById("chip-label");
+    const modeLabel = document.getElementById("mode-label");
+    const systemStateText = document.getElementById("system-state-text");
+    const systemStatusMsg = document.getElementById("system-status-msg");
+    const badgeMode       = document.getElementById("badge-mode");
+    const connLed         = document.getElementById("conn-led");
+    const connText        = document.getElementById("conn-text");
+
+    const btnPower    = document.getElementById("btn-power");
+    const btnEmg      = document.getElementById("btn-emg");
+    const btnModeMan  = document.getElementById("btn-mode-man");
+    const btnModeAuto = document.getElementById("btn-mode-auto");
+
+    const actuatorButtons = document.querySelectorAll(".actuator-btn");
+
+    const spVpdMin  = document.getElementById("sp-vpdMin");
+    const spVpdMax  = document.getElementById("sp-vpdMax");
+    const spSoilMin = document.getElementById("sp-soilMin");
+    const spSoilMax = document.getElementById("sp-soilMax");
+    const spRadMax  = document.getElementById("sp-radMax");
+
+    const logList      = document.getElementById("log-list");
+    const btnClearLog  = document.getElementById("btn-clear-log");
+    const alarmList    = document.getElementById("alarm-list");
+    const btnAddFakeAlarm = document.getElementById("btn-add-fake-alarm");
+    const btnAckAlarms    = document.getElementById("btn-ack-alarms");
+
+    function logEvent(text) {
+      if (!logList) return;
+      const li = document.createElement("li");
+      li.className = "log-item";
+
+      const timeSpan = document.createElement("span");
+      timeSpan.className = "log-time";
+      const now = new Date();
+      const hh = String(now.getHours()).padStart(2, "0");
+      const mm = String(now.getMinutes()).padStart(2, "0");
+      timeSpan.textContent = `${hh}:${mm}`;
+
+      const textSpan = document.createElement("span");
+      textSpan.className = "log-text";
+      textSpan.textContent = text;
+
+      li.appendChild(timeSpan);
+      li.appendChild(textSpan);
+      logList.insertBefore(li, logList.firstChild);
+
+      const maxItems = 80;
+      while (logList.children.length > maxItems) {
+        logList.removeChild(logList.lastChild);
+      }
+    }
+
+    function updateConnectionIndicator() {
+      if (!connLed || !connText) return;
+      const now = Date.now();
+      const espOnline = mqttConnected && lastEspUpdate && (now - lastEspUpdate < ESP_TIMEOUT_MS);
+
+      connLed.classList.remove("ok", "warn", "off");
+
+      if (!mqttConnected) {
+        connLed.classList.add("off");
+        connText.textContent = "Sin conexión MQTT";
+      } else if (!espOnline) {
+        connLed.classList.add("warn");
+        connText.textContent = "MQTT OK, sin datos de ESP32";
+      } else {
+        connLed.classList.add("ok");
+        connText.textContent = "ESP32 en línea";
+      }
+    }
+
+    function refreshHeader() {
+      if (state.systemOn) {
+        chipDot.classList.add("on");
+        chipLabel.textContent = "Control automático activo";
+        systemStateText.textContent = "En ejecución";
+        systemStatusMsg.textContent =
+          state.mode === "auto"
+            ? "Reglas VPD + humedad aplicadas por sector"
+            : "Control manual con supervisión local";
+      } else {
+        chipDot.classList.remove("on");
+        chipLabel.textContent = "Control detenido";
+        systemStateText.textContent = "Detenido";
+        systemStatusMsg.textContent = "Esperando activación";
+      }
+
+      modeLabel.textContent =
+        "Modo actual: " + (state.mode === "auto" ? "Automático" : "Manual");
+
+      if (state.mode === "auto") {
+        badgeMode.textContent = "Automático";
+        badgeMode.classList.remove("badge-manual");
+        badgeMode.classList.add("badge-auto");
+      } else {
+        badgeMode.textContent = "Manual";
+        badgeMode.classList.remove("badge-auto");
+        badgeMode.classList.add("badge-manual");
+      }
+    }
+
+    function refreshButtons() {
+      const powerLabel = document.getElementById("power-label");
+      if (state.systemOn) {
+        btnPower.classList.add("active");
+        powerLabel.textContent = "Detener control automático";
+      } else {
+        btnPower.classList.remove("active");
+        powerLabel.textContent = "Activar control automático";
+      }
+
+      if (state.mode === "manual") {
+        btnModeMan.classList.add("active");
+        btnModeAuto.classList.remove("active");
+      } else {
+        btnModeMan.classList.remove("active");
+        btnModeAuto.classList.add("active");
+      }
+
+      actuatorButtons.forEach((btn) => {
+        const id = btn.dataset.act;
+        const on = state.sectors[id];
+
+        if (state.mode === "auto") {
+          btn.classList.add("disabled");
+        } else {
+          btn.classList.remove("disabled");
+        }
+
+        if (on) {
+          btn.classList.add("active");
+          btn.textContent = "ON";
+        } else {
+          btn.classList.remove("active");
+          btn.textContent = "OFF";
+        }
+      });
+    }
+
+    function refreshSetpoints() {
+      spVpdMin.textContent  = state.setpoints.vpdMin.toFixed(2) + " kPa";
+      spVpdMax.textContent  = state.setpoints.vpdMax.toFixed(2) + " kPa";
+      spSoilMin.textContent = state.setpoints.soilMin + " %";
+      spSoilMax.textContent = state.setpoints.soilMax + " %";
+      spRadMax.textContent  = state.setpoints.radMax + " lux";
+    }
+
+    function renderAlarms() {
+      alarmList.innerHTML = "";
+
+      if (!state.alarms || state.alarms.length === 0) {
+        const li = document.createElement("li");
+        li.className = "alarm-empty";
+        li.textContent = "Sin alarmas activas.";
+        alarmList.appendChild(li);
+        return;
+      }
+
+      state.alarms.forEach((a) => {
+        const li = document.createElement("li");
+        li.className = "alarm-item";
+
+        const text = document.createElement("span");
+        text.className = "alarm-text";
+        text.textContent = a.text;
+
+        const level = document.createElement("span");
+        level.className = "alarm-level";
+        level.textContent = a.level || "INFO";
+
+        li.appendChild(text);
+        li.appendChild(level);
+        alarmList.appendChild(li);
+      });
+    }
+
+    function updateIndicators() {
+      const vpdValueEl = document.getElementById("vpd-value");
+      const vpdStatusEl = document.getElementById("vpd-status");
+      if (vpdValueEl && typeof state.vpd === "number") {
+        vpdValueEl.textContent = state.vpd.toFixed(2);
+      }
+      if (vpdStatusEl) {
+        vpdStatusEl.classList.remove("bad", "warn");
+        if (state.vpd < state.setpoints.vpdMin || state.vpd > state.setpoints.vpdMax) {
+          vpdStatusEl.textContent = "Fuera de banda";
+          vpdStatusEl.classList.add("warn");
+        } else {
+          vpdStatusEl.textContent = "En banda";
+        }
+      }
+
+      const radValueEl = document.getElementById("rad-value");
+      const radStatusEl = document.getElementById("rad-status");
+      if (radValueEl && typeof state.rad === "number") {
+        radValueEl.textContent = state.rad.toFixed(0);
+      }
+      if (radStatusEl) {
+        radStatusEl.classList.remove("bad", "warn");
+        if (state.rad > state.setpoints.radMax) {
+          radStatusEl.textContent = "Riego bloqueado por radiación";
+          radStatusEl.classList.add("warn");
+        } else {
+          radStatusEl.textContent = "Riego habilitado";
+        }
+      }
+
+      for (let i = 0; i < 3; i++) {
+        const val = state.soil[i];
+        const valEl = document.getElementById(`soil${i + 1}-value`);
+        const stEl  = document.getElementById(`soil${i + 1}-status`);
+        if (valEl && typeof val === "number") {
+          valEl.textContent = val.toFixed(0);
+        }
+        if (stEl) {
+          stEl.classList.remove("bad", "warn");
+          if (val < state.setpoints.soilMin) {
+            stEl.textContent = "Suelo seco";
+            stEl.classList.add("bad");
+          } else if (val > state.setpoints.soilMax) {
+            stEl.textContent = "Suelo saturado";
+            stEl.classList.add("warn");
+          } else {
+            stEl.textContent = "En banda";
+          }
+        }
+      }
+    }
+
+    function updateFromBackend(data) {
+      if (typeof data.systemOn === "boolean") {
+        state.systemOn = data.systemOn;
+      }
+      if (typeof data.mode === "string") {
+        state.mode = data.mode.toLowerCase();
+      }
+
+      if (typeof data.tair === "number") {
+        const el = document.getElementById("tair-value");
+        if (el) el.textContent = data.tair.toFixed(1);
+        state.tair = data.tair;
+      }
+      if (typeof data.rh === "number") {
+        const el = document.getElementById("rh-value");
+        if (el) el.textContent = data.rh.toFixed(0);
+        state.rh = data.rh;
+      }
+      if (typeof data.vpd === "number") {
+        state.vpd = data.vpd;
+      }
+      if (typeof data.rad === "number") {
+        state.rad = data.rad;
+      }
+
+      if (Array.isArray(data.soil)) {
+        for (let i = 0; i < Math.min(3, data.soil.length); i++) {
+          state.soil[i] = data.soil[i];
+        }
+      }
+
+      if (data.sectors) {
+        state.sectors.s1 = !!data.sectors.s1;
+        state.sectors.s2 = !!data.sectors.s2;
+        state.sectors.s3 = !!data.sectors.s3;
+      }
+
+      if (data.setpoints) {
+        if (typeof data.setpoints.vpdMin === "number")
+          state.setpoints.vpdMin = data.setpoints.vpdMin;
+        if (typeof data.setpoints.vpdMax === "number")
+          state.setpoints.vpdMax = data.setpoints.vpdMax;
+        if (typeof data.setpoints.soilMin === "number")
+          state.setpoints.soilMin = data.setpoints.soilMin;
+        if (typeof data.setpoints.soilMax === "number")
+          state.setpoints.soilMax = data.setpoints.soilMax;
+        if (typeof data.setpoints.radMax === "number")
+          state.setpoints.radMax = data.setpoints.radMax;
+      }
+
+      if (Array.isArray(data.alarms)) {
+        state.alarms = data.alarms;
+      }
+
+      lastEspUpdate = Date.now();
+      refreshHeader();
+      refreshButtons();
+      refreshSetpoints();
+      updateIndicators();
+      renderAlarms();
+      updateConnectionIndicator();
+    }
+
+    function setupMqtt() {
+      const isHttps = (location.protocol === "https:");
+      const host = isHttps
+        ? "wss://broker.emqx.io:8084/mqtt"   // cuando la HMI esté publicada en HTTPS
+        : "ws://broker.emqx.io:8083/mqtt";   // cuando la abras local (file:///)
+
+      const options = {
+        clean: true,
+        connectTimeout: 4000,
+        reconnectPeriod: 2000,
+      };
+
+      mqttClient = mqtt.connect(host, options);
+
+      mqttClient.on("connect", () => {
+        mqttConnected = true;
+        logEvent("Conectado al broker MQTT.");
+        updateConnectionIndicator();
+        mqttClient.subscribe("riego/estado", (err) => {
+          if (!err) {
+            logEvent("Suscrito a riego/estado.");
+          } else {
+            logEvent("Error al suscribirse a riego/estado");
+          }
+        });
+      });
+
+      mqttClient.on("reconnect", () => {
+        logEvent("Reconectando a MQTT…");
+      });
+
+      mqttClient.on("close", () => {
+        mqttConnected = false;
+        logEvent("Conexión MQTT cerrada.");
+        updateConnectionIndicator();
+      });
+
+      mqttClient.on("error", (err) => {
+        mqttConnected = false;
+        console.error("MQTT error:", err);
+        logEvent("Error MQTT: " + (err.message || err));
+        updateConnectionIndicator();
+      });
+
+      mqttClient.on("message", (topic, message) => {
+        logEvent("Mensaje recibido en " + topic);
+        if (topic === "riego/estado") {
+          try {
+            const data = JSON.parse(message.toString());
+            updateFromBackend(data);
+          } catch (e) {
+            console.error("Error parseando estado:", e);
+            logEvent("Error parseando JSON de riego/estado");
+          }
+        }
+      });
+    }
+
+    function sendCommand(cmd) {
+      if (!mqttClient || !mqttClient.connected) {
+        logEvent("MQTT no conectado, comando solo local: " + JSON.stringify(cmd));
+        return;
+      }
+      mqttClient.publish("riego/cmd", JSON.stringify(cmd));
+    }
+
+    btnPower.addEventListener("click", () => {
+      state.systemOn = !state.systemOn;
+      logEvent(
+        state.systemOn
+          ? "Control automático habilitado desde HMI."
+          : "Control automático deshabilitado desde HMI."
+      );
+      refreshHeader();
+      refreshButtons();
+
+      sendCommand({
+        type: "CONTROL_ENABLE",
+        value: state.systemOn,
+      });
+    });
+
+    btnEmg.addEventListener("click", () => {
+      state.systemOn = false;
+      state.sectors.s1 = false;
+      state.sectors.s2 = false;
+      state.sectors.s3 = false;
+      logEvent("¡Paro de emergencia! Todas las válvulas se cierran.");
+      state.alarms.push({
+        text: "Paro de emergencia activado por el operador.",
+        level: "CRIT",
+      });
+
+      refreshHeader();
+      refreshButtons();
+      renderAlarms();
+
+      sendCommand({
+        type: "CONTROL_ENABLE",
+        value: false,
+      });
+    });
+
+    btnModeMan.addEventListener("click", () => {
+      if (state.mode === "manual") return;
+      state.mode = "manual";
+      logEvent("Modo global cambiado a MANUAL.");
+      refreshHeader();
+      refreshButtons();
+      sendCommand({
+        type: "MODE",
+        value: "MANUAL",
+      });
+    });
+
+    btnModeAuto.addEventListener("click", () => {
+      if (state.mode === "auto") return;
+      state.mode = "auto";
+      logEvent("Modo global cambiado a AUTOMÁTICO (VPD + humedad).");
+      refreshHeader();
+      refreshButtons();
+      sendCommand({
+        type: "MODE",
+        value: "AUTO",
+      });
+    });
+
+    actuatorButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        if (state.mode === "auto") return;
+        const id = btn.dataset.act;
+        state.sectors[id] = !state.sectors[id];
+        logEvent(
+          `Válvula ${id.toUpperCase()} cambiada a ${
+            state.sectors[id] ? "ON" : "OFF"
+          } en modo manual.`
+        );
+        refreshButtons();
+
+        sendCommand({
+          type: "VALVE",
+          sector: id,
+          value: state.sectors[id],
+        });
+      });
+    });
+
+    document.querySelectorAll(".btn-icon").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const sp = btn.dataset.sp;
+        const delta = parseFloat(btn.dataset.delta);
+        if (!sp || isNaN(delta)) return;
+
+        if (sp === "vpdMin" || sp === "vpdMax") {
+          state.setpoints[sp] = parseFloat(
+            (state.setpoints[sp] + delta).toFixed(2)
+          );
+          logEvent(
+            `${sp} ajustado a ${state.setpoints[sp].toFixed(2)} kPa.`
+          );
+        } else if (sp === "soilMin" || sp === "soilMax") {
+          state.setpoints[sp] = Math.max(
+            0,
+            Math.min(100, state.setpoints[sp] + delta)
+          );
+          logEvent(
+            `Umbral ${
+              sp === "soilMin" ? "mínimo" : "máximo"
+            } de humedad ajustado a ${state.setpoints[sp]} %.`
+          );
+        } else if (sp === "radMax") {
+          state.setpoints.radMax = Math.max(
+            10000,
+            state.setpoints.radMax + delta
+          );
+          logEvent(
+            `Radiación máxima para riego ajustada a ${state.setpoints.radMax} lux.`
+          );
+        }
+
+        refreshSetpoints();
+        updateIndicators();
+
+        sendCommand({
+          type: "SETPOINT",
+          name: sp,
+          value: state.setpoints[sp],
+        });
+      });
+    });
+
+    btnAddFakeAlarm.addEventListener("click", () => {
+      const sample = [
+        {
+          text: "VPD fuera de banda durante >15 min.",
+          level: "HIGH",
+        },
+        {
+          text: "Humedad suelo S2 por debajo del mínimo.",
+          level: "LOW",
+        },
+        {
+          text: "Sensor BH1750 sin respuesta.",
+          level: "WARN",
+        },
+      ];
+      const a = sample[Math.floor(Math.random() * sample.length)];
+      state.alarms.push(a);
+      logEvent("Alarma generada localmente: " + a.text);
+      renderAlarms();
+    });
+
+    btnAckAlarms.addEventListener("click", () => {
+      if (!state.alarms.length) return;
+      logEvent("Todas las alarmas fueron reconocidas por el operador.");
+      state.alarms = [];
+      renderAlarms();
+    });
+
+    btnClearLog.addEventListener("click", () => {
+      logList.innerHTML = "";
+    });
+
+    function init() {
+      refreshHeader();
+      refreshButtons();
+      refreshSetpoints();
+      updateIndicators();
+      renderAlarms();
+      updateConnectionIndicator();
+      logEvent("HMI de riego cargada. Conectando a MQTT…");
+      setupMqtt();
+      setInterval(updateConnectionIndicator, 2000);
+    }
+
+    init();
+  </script>
+</body>
+</html>
