@@ -27,13 +27,8 @@
       --warn: #ffcc4d;
       --bad: #ff4b5c;
     }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    html,
-    body {
+    * { box-sizing: border-box; }
+    html, body {
       margin: 0;
       padding: 0;
       height: 100%;
@@ -42,14 +37,12 @@
       color: var(--text-main);
       overflow-x: hidden;
     }
-
     body {
       display: flex;
       justify-content: center;
       align-items: flex-start;
       padding: 24px;
     }
-
     .app {
       width: 100%;
       max-width: 1360px;
@@ -63,38 +56,25 @@
       gap: 18px;
       border: 1px solid #20263a;
     }
-
     header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 16px;
     }
-
-    .title-block {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
+    .title-block { display:flex; flex-direction:column; gap:4px; }
     .title {
       font-size: 18px;
       font-weight: 600;
       letter-spacing: 0.08em;
       text-transform: uppercase;
     }
-
-    .subtitle {
-      font-size: 12px;
-      color: var(--text-soft);
-    }
-
+    .subtitle { font-size: 12px; color: var(--text-soft); }
     .status-group {
       display: flex;
       align-items: center;
       gap: 12px;
     }
-
     .status-pill {
       display: inline-flex;
       align-items: center;
@@ -106,440 +86,335 @@
       font-size: 11px;
       color: var(--text-soft);
     }
-
-    .status-dot {
-      width: 9px;
-      height: 9px;
-      border-radius: 50%;
-    }
-
-    .dot-red {
-      background: var(--accent-red);
-      box-shadow: 0 0 0 4px var(--accent-red-soft);
-    }
-    .dot-amber {
-      background: var(--warn);
-      box-shadow: 0 0 0 4px rgba(255, 204, 77, 0.25);
-    }
-    .dot-green {
-      background: var(--accent);
-      box-shadow: 0 0 0 4px var(--accent-soft);
-    }
-
-    .status-label-strong {
-      font-weight: 500;
-      color: var(--text-main);
-    }
+    .status-dot { width: 9px; height: 9px; border-radius: 50%; }
+    .dot-red   { background: var(--accent-red); box-shadow:0 0 0 4px var(--accent-red-soft); }
+    .dot-amber { background: var(--warn);       box-shadow:0 0 0 4px rgba(255,204,77,0.25); }
+    .dot-green { background: var(--accent);     box-shadow:0 0 0 4px var(--accent-soft); }
+    .status-label-strong { font-weight: 500; color: var(--text-main); }
 
     main {
-      display: grid;
-      grid-template-columns: 1.1fr 1.1fr 1.1fr;
-      gap: 14px;
-      align-items: stretch;
+      display:grid;
+      grid-template-columns:1.1fr 1.1fr 1.1fr;
+      gap:14px;
+      align-items:stretch;
     }
-
     .card {
       background: linear-gradient(135deg, #101626 0, #090e1a 100%);
       border-radius: 18px;
       padding: 14px 16px 16px;
       border: 1px solid var(--border-soft);
       box-shadow: 0 14px 35px rgba(0, 0, 0, 0.55);
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      position: relative;
-      overflow: hidden;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      position:relative;
+      overflow:hidden;
     }
-
     .card::before {
-      content: "";
-      position: absolute;
-      inset: -40%;
-      background: radial-gradient(circle at 10% 0, rgba(87, 204, 255, 0.04), transparent 55%);
-      opacity: 0.9;
-      pointer-events: none;
+      content:"";
+      position:absolute;
+      inset:-40%;
+      background:radial-gradient(circle at 10% 0, rgba(87,204,255,0.04), transparent 55%);
+      opacity:0.9;
+      pointer-events:none;
     }
-
     .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      gap: 8px;
-      position: relative;
-      z-index: 1;
+      display:flex;
+      justify-content:space-between;
+      align-items:baseline;
+      gap:8px;
+      position:relative;
+      z-index:1;
     }
-
     .card-title {
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
+      font-size:13px;
+      font-weight:600;
+      letter-spacing:0.06em;
+      text-transform:uppercase;
     }
-
-    .card-sub {
-      font-size: 11px;
-      color: var(--text-soft);
-    }
-
+    .card-sub { font-size:11px; color:var(--text-soft); }
     .badge {
-      font-size: 10px;
-      padding: 3px 8px;
-      border-radius: 999px;
-      background: var(--chip-soft);
-      color: var(--text-soft);
-      border: 1px solid var(--border-soft);
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
+      font-size:10px;
+      padding:3px 8px;
+      border-radius:999px;
+      background:var(--chip-soft);
+      color:var(--text-soft);
+      border:1px solid var(--border-soft);
+      text-transform:uppercase;
+      letter-spacing:0.06em;
     }
 
     .grid-metrics {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
-      z-index: 1;
-      position: relative;
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
+      z-index:1;
+      position:relative;
     }
-
     .metric-card {
-      background: var(--bg-card);
-      border-radius: 14px;
-      padding: 9px 9px 10px;
-      border: 1px solid rgba(52, 65, 109, 0.85);
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
+      background:var(--bg-card);
+      border-radius:14px;
+      padding:9px 9px 10px;
+      border:1px solid rgba(52,65,109,0.85);
+      display:flex;
+      flex-direction:column;
+      gap:4px;
     }
+    .metric-label { font-size:11px; color:var(--text-soft); }
+    .metric-value-row { display:flex; align-items:baseline; gap:4px; }
+    .metric-value { font-size:19px; font-weight:600; }
+    .metric-unit  { font-size:11px; color:var(--text-soft); }
+    .metric-tag { font-size:10px; color:var(--good); }
+    .metric-tag.warn { color:var(--warn); }
+    .metric-tag.bad  { color:var(--bad); }
+    .metric-footer { font-size:10px; color:var(--text-soft); }
 
-    .metric-label {
-      font-size: 11px;
-      color: var(--text-soft);
-    }
-
-    .metric-value-row {
-      display: flex;
-      align-items: baseline;
-      gap: 4px;
-    }
-
-    .metric-value {
-      font-size: 19px;
-      font-weight: 600;
-    }
-
-    .metric-unit {
-      font-size: 11px;
-      color: var(--text-soft);
-    }
-
-    .metric-tag {
-      font-size: 10px;
-      color: var(--good);
-    }
-    .metric-tag.warn {
-      color: var(--warn);
-    }
-    .metric-tag.bad {
-      color: var(--bad);
-    }
-
-    .metric-footer {
-      font-size: 10px;
-      color: var(--text-soft);
-    }
-
-    .chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 5px 8px;
-      border-radius: 999px;
-      background: var(--chip-bg);
-      font-size: 10px;
-      color: var(--text-soft);
-      border: 1px solid var(--border-soft);
-    }
-
-    .chip-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--accent);
+    .pill-small {
+      font-size:10px;
+      padding:3px 8px;
+      border-radius:999px;
+      background:var(--chip-bg);
+      border:1px solid var(--border-soft);
+      color:var(--text-soft);
     }
 
     .btn-pill {
-      border-radius: 999px;
-      border: 1px solid var(--border-soft);
-      background: var(--chip-bg);
-      color: var(--text-soft);
-      font-size: 11px;
-      padding: 7px 14px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.15s ease-out;
+      border-radius:999px;
+      border:1px solid var(--border-soft);
+      background:var(--chip-bg);
+      color:var(--text-soft);
+      font-size:11px;
+      padding:7px 14px;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      transition:all 0.15s ease-out;
     }
-
     .btn-pill.primary {
-      background: var(--accent-soft);
-      border-color: var(--accent);
-      color: var(--text-main);
+      background:var(--accent-soft);
+      border-color:var(--accent);
+      color:var(--text-main);
     }
-
     .btn-pill.danger {
-      background: var(--accent-red-soft);
-      border-color: var(--accent-red);
-      color: var(--text-main);
+      background:var(--accent-red-soft);
+      border-color:var(--accent-red);
+      color:var(--text-main);
     }
-
-    .btn-pill.active {
-      box-shadow: 0 0 0 1px var(--accent);
-    }
-
     .btn-pill:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 7px 18px rgba(0, 0, 0, 0.4);
+      transform:translateY(-1px);
+      box-shadow:0 7px 18px rgba(0,0,0,0.4);
     }
 
     .btn-group {
-      display: inline-flex;
-      padding: 3px;
-      border-radius: 999px;
-      background: var(--chip-bg);
-      border: 1px solid var(--border-soft);
+      display:inline-flex;
+      padding:3px;
+      border-radius:999px;
+      background:var(--chip-bg);
+      border:1px solid var(--border-soft);
     }
-
     .btn-toggle {
-      border: none;
-      outline: none;
-      padding: 5px 12px;
-      font-size: 11px;
-      cursor: pointer;
-      border-radius: 999px;
-      background: transparent;
-      color: var(--text-soft);
-      transition: all 0.15s;
+      border:none;
+      outline:none;
+      padding:5px 12px;
+      font-size:11px;
+      cursor:pointer;
+      border-radius:999px;
+      background:transparent;
+      color:var(--text-soft);
+      transition:all 0.15s;
     }
-
     .btn-toggle.active {
-      background: var(--accent-soft);
-      color: var(--text-main);
+      background:var(--accent-soft);
+      color:var(--text-main);
     }
-
-    .btn-toggle + .btn-toggle {
-      margin-left: 4px;
-    }
-
-    .pill-small {
-      font-size: 10px;
-      padding: 3px 8px;
-      border-radius: 999px;
-      background: var(--chip-bg);
-      border: 1px solid var(--border-soft);
-      color: var(--text-soft);
-    }
+    .btn-toggle + .btn-toggle { margin-left:4px; }
 
     .valve-card {
-      background: var(--bg-card);
-      border-radius: 15px;
-      padding: 10px 10px 9px;
-      border: 1px solid rgba(52, 65, 109, 0.9);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
+      background:var(--bg-card);
+      border-radius:15px;
+      padding:10px 10px 9px;
+      border:1px solid rgba(52,65,109,0.9);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
     }
+    .valve-info { display:flex; flex-direction:column; gap:2px; }
+    .valve-title { font-size:12px; font-weight:500; }
+    .valve-sub { font-size:11px; color:var(--text-soft); }
 
-    .valve-info {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .valve-title {
-      font-size: 12px;
-      font-weight: 500;
-    }
-
-    .valve-sub {
-      font-size: 11px;
-      color: var(--text-soft);
-    }
-
-    .switch {
-      position: relative;
-      width: 46px;
-      height: 24px;
-    }
-
-    .switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-
+    .switch { position:relative; width:46px; height:24px; }
+    .switch input { opacity:0; width:0; height:0; }
     .slider {
-      position: absolute;
-      cursor: pointer;
-      inset: 0;
-      background-color: #22293c;
-      transition: 0.2s;
-      border-radius: 999px;
-      border: 1px solid var(--border-soft);
+      position:absolute;
+      cursor:pointer;
+      inset:0;
+      background-color:#22293c;
+      transition:0.2s;
+      border-radius:999px;
+      border:1px solid var(--border-soft);
     }
-
     .slider:before {
-      position: absolute;
-      content: "";
-      height: 17px;
-      width: 17px;
-      left: 3px;
-      top: 2px;
-      background-color: #ffffff;
-      transition: 0.2s;
-      border-radius: 50%;
+      position:absolute;
+      content:"";
+      height:17px; width:17px;
+      left:3px; top:2px;
+      background-color:#ffffff;
+      transition:0.2s;
+      border-radius:50%;
     }
-
     input:checked + .slider {
-      background-color: rgba(60, 242, 165, 0.12);
-      border-color: var(--accent);
+      background-color:rgba(60,242,165,0.12);
+      border-color:var(--accent);
     }
-
     input:checked + .slider:before {
-      transform: translateX(20px);
-      background: var(--accent);
-      box-shadow: 0 0 0 5px rgba(60, 242, 165, 0.25);
+      transform:translateX(20px);
+      background:var(--accent);
+      box-shadow:0 0 0 5px rgba(60,242,165,0.25);
     }
 
     .logs {
-      flex: 1;
-      min-height: 180px;
-      max-height: 220px;
-      overflow-y: auto;
-      margin-top: 4px;
-      padding-right: 6px;
-      font-size: 11px;
+      flex:1;
+      min-height:180px;
+      max-height:220px;
+      overflow-y:auto;
+      margin-top:4px;
+      padding-right:6px;
+      font-size:11px;
     }
-
     .log-entry {
-      padding: 3px 0;
-      border-bottom: 1px solid rgba(35, 45, 73, 0.8);
-      display: flex;
-      gap: 8px;
-      color: var(--text-soft);
+      padding:3px 0;
+      border-bottom:1px solid rgba(35,45,73,0.8);
+      display:flex;
+      gap:8px;
+      color:var(--text-soft);
     }
-
-    .log-time {
-      color: #737fa1;
-      min-width: 40px;
-    }
-
-    .log-msg {
-      flex: 1;
-    }
+    .log-time { color:#737fa1; min-width:40px; }
+    .log-msg  { flex:1; }
 
     .btn-small {
-      font-size: 10px;
-      padding: 4px 9px;
-      border-radius: 999px;
-      border: 1px solid var(--border-soft);
-      background: var(--chip-bg);
-      color: var(--text-soft);
-      cursor: pointer;
+      font-size:10px;
+      padding:4px 9px;
+      border-radius:999px;
+      border:1px solid var(--border-soft);
+      background:var(--chip-bg);
+      color:var(--text-soft);
+      cursor:pointer;
     }
-
-    .btn-small:hover {
-      background: var(--chip-soft);
-    }
+    .btn-small:hover { background:var(--chip-soft); }
 
     .history-section {
-      margin-top: 4px;
-      background: linear-gradient(135deg, #101626 0, #090e1a 100%);
-      border-radius: 16px;
-      padding: 12px 16px 14px;
-      border: 1px solid var(--border-soft);
-      box-shadow: 0 14px 35px rgba(0, 0, 0, 0.5);
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+      margin-top:4px;
+      background:linear-gradient(135deg,#101626 0,#090e1a 100%);
+      border-radius:16px;
+      padding:12px 16px 14px;
+      border:1px solid var(--border-soft);
+      box-shadow:0 14px 35px rgba(0,0,0,0.5);
+      display:flex;
+      flex-direction:column;
+      gap:8px;
     }
-
     .history-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      gap: 12px;
+      display:flex;
+      justify-content:space-between;
+      align-items:baseline;
+      gap:12px;
     }
-
     .history-title {
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
+      font-size:12px;
+      font-weight:600;
+      letter-spacing:0.08em;
+      text-transform:uppercase;
     }
-
-    .history-sub {
-      font-size: 11px;
-      color: var(--text-soft);
-    }
-
+    .history-sub { font-size:11px; color:var(--text-soft); }
     .history-body {
-      display: grid;
-      grid-template-columns: 1.3fr 1.1fr;
-      gap: 16px;
-      align-items: stretch;
-      margin-top: 4px;
+      display:grid;
+      grid-template-columns:1.3fr 1.1fr;
+      gap:16px;
+      align-items:stretch;
+      margin-top:4px;
     }
-
     .chart-card {
-      background: var(--bg-card-soft);
-      border-radius: 14px;
-      border: 1px solid var(--border-soft);
-      padding: 9px 10px 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      min-height: 170px;
+      background:var(--bg-card-soft);
+      border-radius:14px;
+      border:1px solid var(--border-soft);
+      padding:9px 10px 10px;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      min-height:170px;
     }
+    .chart-title { font-size:11px; color:var(--text-soft); }
+    .chart-container { position:relative; flex:1; min-height:130px; }
+    canvas { width:100%!important; height:100%!important; }
 
-    .chart-title {
-      font-size: 11px;
-      color: var(--text-soft);
+    /* Setpoints */
+    .setpoints-block { margin-top:4px; }
+    .setpoints-grid {
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:8px;
+      margin-top:6px;
     }
-
-    .chart-container {
-      position: relative;
-      flex: 1;
-      min-height: 130px;
+    .sp-item {
+      background:var(--bg-card);
+      border-radius:12px;
+      padding:6px 8px 7px;
+      border:1px solid rgba(52,65,109,0.85);
+      display:flex;
+      flex-direction:column;
+      gap:4px;
     }
-
-    canvas {
-      width: 100% !important;
-      height: 100% !important;
+    .sp-label { font-size:10px; color:var(--text-soft); }
+    .sp-row {
+      display:flex;
+      align-items:center;
+      gap:4px;
     }
+    .sp-row input {
+      flex:1;
+      min-width:0;
+      background:#050814;
+      border-radius:8px;
+      border:1px solid var(--border-soft);
+      padding:3px 6px;
+      color:var(--text-main);
+      font-size:11px;
+    }
+    .sp-row input:focus {
+      outline:none;
+      border-color:var(--accent);
+      box-shadow:0 0 0 1px rgba(60,242,165,0.5);
+    }
+    .sp-sep { font-size:10px; color:var(--text-soft); }
+    .sp-btn {
+      font-size:10px;
+      padding:4px 7px;
+      border-radius:999px;
+      border:1px solid var(--border-soft);
+      background:var(--chip-bg);
+      color:var(--text-soft);
+      cursor:pointer;
+      white-space:nowrap;
+    }
+    .sp-btn:hover { background:var(--chip-soft); }
 
     footer {
-      margin-top: 4px;
-      font-size: 10px;
-      color: var(--text-soft);
-      display: flex;
-      justify-content: space-between;
-      gap: 8px;
+      margin-top:4px;
+      font-size:10px;
+      color:var(--text-soft);
+      display:flex;
+      justify-content:space-between;
+      gap:8px;
     }
 
-    @media (max-width: 1100px) {
-      body {
-        padding: 10px;
-      }
-      .app {
-        padding: 16px;
-      }
-      main {
-        grid-template-columns: 1fr;
-      }
-      .history-body {
-        grid-template-columns: 1fr;
-      }
+    @media (max-width:1100px) {
+      body { padding:10px; }
+      .app { padding:16px; }
+      main { grid-template-columns:1fr; }
+      .history-body { grid-template-columns:1fr; }
+      .setpoints-grid { grid-template-columns:1fr; }
     }
   </style>
 </head>
@@ -547,31 +422,28 @@
 <div class="app">
   <header>
     <div class="title-block">
-      <div class="title">Sistema de riego inteligente – Palta fuerte</div>
+      <div class="title">SISTEMA DE RIEGO INTELIGENTE – PALTA FUERTE</div>
       <div class="subtitle">Parcela piloto – Prototipo 1 sector (ESP32 + IoT)</div>
     </div>
-
     <div class="status-group">
-      <div class="status-pill" id="statusControl">
+      <div class="status-pill">
         <span class="status-dot dot-red" id="dotControl"></span>
         <span class="status-label-strong" id="labelControl">Control detenido</span>
         <span>Modo actual: <span id="labelMode">Manual</span></span>
       </div>
-
-      <div class="status-pill" id="statusMqtt">
+      <div class="status-pill">
         <span class="status-dot dot-amber" id="dotMqtt"></span>
-        <span>MQTT: <span id="labelMqtt">Conectando...</span></span>
+        <span>MQTT: <span id="labelMqtt">Conectando al broker MQTT</span></span>
       </div>
-
-      <div class="status-pill" id="statusEsp32">
+      <div class="status-pill">
         <span class="status-dot dot-amber" id="dotEsp32"></span>
-        <span>ESP32: <span id="labelEsp32">Sin datos recientes</span></span>
+        <span>ESP32: <span id="labelEsp32">Sin actualización reciente</span></span>
       </div>
     </div>
   </header>
 
   <main>
-    <!-- MONITOREO TIEMPO REAL -->
+    <!-- MONITOREO -->
     <section class="card">
       <div class="card-header">
         <div>
@@ -582,7 +454,6 @@
       </div>
 
       <div class="grid-metrics">
-        <!-- Temperatura aire -->
         <div class="metric-card">
           <div class="metric-label">Temperatura aire</div>
           <div class="metric-value-row">
@@ -593,7 +464,6 @@
           <div class="metric-footer">Rango sugerido: 18–30 °C</div>
         </div>
 
-        <!-- Humedad relativa -->
         <div class="metric-card">
           <div class="metric-label">Humedad relativa</div>
           <div class="metric-value-row">
@@ -604,7 +474,6 @@
           <div class="metric-footer">Objetivo: 40–70 %</div>
         </div>
 
-        <!-- VPD -->
         <div class="metric-card">
           <div class="metric-label">Déficit de presión de vapor (VPD)</div>
           <div class="metric-value-row">
@@ -615,7 +484,6 @@
           <div class="metric-footer">Banda objetivo: 0.6 – 1.2 kPa</div>
         </div>
 
-        <!-- Radiación -->
         <div class="metric-card">
           <div class="metric-label">Radiación en copa</div>
           <div class="metric-value-row">
@@ -626,7 +494,6 @@
           <div class="metric-footer">Límite para riego: &lt; 60 000 lux</div>
         </div>
 
-        <!-- Humedad suelo único -->
         <div class="metric-card">
           <div class="metric-label">Humedad de suelo S1 (sector único)</div>
           <div class="metric-value-row">
@@ -637,7 +504,6 @@
           <div class="metric-footer">Banda objetivo: 30–60 %</div>
         </div>
 
-        <!-- Estado general -->
         <div class="metric-card">
           <div class="metric-label">Estado general</div>
           <div class="metric-value-row">
@@ -660,12 +526,8 @@
 
       <div style="display:flex; flex-direction:column; gap:10px; z-index:1; position:relative;">
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <button class="btn-pill primary" id="btnEnable">
-            Activar control automático
-          </button>
-          <button class="btn-pill danger" id="btnStop">
-            Paro de emergencia
-          </button>
+          <button class="btn-pill primary" id="btnEnable">Activar control automático</button>
+          <button class="btn-pill danger" id="btnStop">Paro de emergencia</button>
         </div>
 
         <div>
@@ -685,10 +547,44 @@
           <button class="btn-pill" id="btnTestAlarm">Generar alarma de prueba</button>
           <button class="btn-pill" id="btnAckAlarms">Reconocer todas</button>
         </div>
+
+        <!-- SETPOINTS -->
+        <div class="setpoints-block">
+          <div class="card-sub">Banda de setpoints (prototipo)</div>
+          <div class="setpoints-grid">
+            <div class="sp-item">
+              <div class="sp-label">Banda VPD (kPa)</div>
+              <div class="sp-row">
+                <input id="spVpdMin" type="number" step="0.05" placeholder="mín" />
+                <span class="sp-sep">–</span>
+                <input id="spVpdMax" type="number" step="0.05" placeholder="máx" />
+                <button class="sp-btn" id="btnSpVpd">Enviar</button>
+              </div>
+            </div>
+
+            <div class="sp-item">
+              <div class="sp-label">Humedad suelo (%)</div>
+              <div class="sp-row">
+                <input id="spSoilMin" type="number" step="1" placeholder="mín" />
+                <span class="sp-sep">–</span>
+                <input id="spSoilMax" type="number" step="1" placeholder="máx" />
+                <button class="sp-btn" id="btnSpSoil">Enviar</button>
+              </div>
+            </div>
+
+            <div class="sp-item">
+              <div class="sp-label">Radiación máx. (lux)</div>
+              <div class="sp-row">
+                <input id="spRadMax" type="number" step="1000" placeholder="máx" />
+                <button class="sp-btn" id="btnSpRad">Enviar</button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- CONTROL DE SECTOR ÚNICO -->
+    <!-- CONTROL SECTOR -->
     <section class="card">
       <div class="card-header">
         <div>
@@ -720,7 +616,7 @@
     </section>
   </main>
 
-  <!-- HISTÓRICO DE VARIABLES -->
+  <!-- HISTÓRICO -->
   <section class="history-section">
     <div class="history-header">
       <div>
@@ -736,16 +632,12 @@
     <div class="history-body">
       <div class="chart-card">
         <div class="chart-title">Temperatura y humedad relativa</div>
-        <div class="chart-container">
-          <canvas id="chartTempHum"></canvas>
-        </div>
+        <div class="chart-container"><canvas id="chartTempHum"></canvas></div>
       </div>
 
       <div class="chart-card">
         <div class="chart-title">Humedad de suelo (Sector único)</div>
-        <div class="chart-container">
-          <canvas id="chartSoil"></canvas>
-        </div>
+        <div class="chart-container"><canvas id="chartSoil"></canvas></div>
       </div>
     </div>
   </section>
@@ -756,30 +648,25 @@
   </footer>
 </div>
 
-<!-- Librerías externas -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
-
 <script>
-  // ================== CONFIGURACIÓN ==================
-  const MQTT_BROKER_URL = "wss://broker.emqx.io:8084/mqtt";
+  const MQTT_BROKER_URL  = "wss://broker.emqx.io:8084/mqtt";
   const MQTT_TOPIC_STATE = "riego/estado";
   const MQTT_TOPIC_CMD   = "riego/cmd";
 
-  // BACKEND histórico (Render)
   const HISTORY_API_BASE =
     (location.protocol === "file:" || location.hostname === "localhost")
       ? "http://localhost:3000"
-      : "https://riego-bridge.onrender.com"; // <-- pon aquí tu URL de Render si es distinta
+      : "https://riego-bridge.onrender.com"; // <-- si tu URL de Render es otra, cámbiala aquí
 
-  // ================== ESTADO LOCAL HMI ==================
   let mqttClient = null;
   let lastEsp32Ts = 0;
   let controlEnabled = false;
   let currentMode = "MANUAL";
   let lastState = null;
 
-  // ================== ELEMENTOS DOM ==================
+  // DOM
   const dotControl = document.getElementById("dotControl");
   const labelControl = document.getElementById("labelControl");
   const labelMode = document.getElementById("labelMode");
@@ -793,7 +680,7 @@
   const rhValue   = document.getElementById("rhValue");
   const vpdValue  = document.getElementById("vpdValue");
   const radValue  = document.getElementById("radValue");
-  const soil1Value = document.getElementById("soil1Value");
+  const soil1Value= document.getElementById("soil1Value");
 
   const tairTag = document.getElementById("tairTag");
   const rhTag   = document.getElementById("rhTag");
@@ -821,7 +708,16 @@
   const btnRange24h = document.getElementById("btnRange24h");
   const btnRange3d  = document.getElementById("btnRange3d");
 
-  // ================== UTILIDADES ==================
+  // setpoints inputs
+  const spVpdMin  = document.getElementById("spVpdMin");
+  const spVpdMax  = document.getElementById("spVpdMax");
+  const spSoilMin = document.getElementById("spSoilMin");
+  const spSoilMax = document.getElementById("spSoilMax");
+  const spRadMax  = document.getElementById("spRadMax");
+  const btnSpVpd  = document.getElementById("btnSpVpd");
+  const btnSpSoil = document.getElementById("btnSpSoil");
+  const btnSpRad  = document.getElementById("btnSpRad");
+
   function setControlStatus() {
     if (controlEnabled) {
       dotControl.classList.remove("dot-red");
@@ -835,10 +731,9 @@
     labelMode.textContent = currentMode === "AUTO" ? "Automático" : "Manual";
     badgeMode.textContent = labelMode.textContent;
   }
-
-  function setMqttStatus(connected) {
-    if (connected) {
-      dotMqtt.classList.remove("dot-red", "dot-amber");
+  function setMqttStatus(ok) {
+    if (ok) {
+      dotMqtt.classList.remove("dot-red","dot-amber");
       dotMqtt.classList.add("dot-green");
       labelMqtt.textContent = "Conectado al broker MQTT";
     } else {
@@ -847,17 +742,16 @@
       labelMqtt.textContent = "Desconectado";
     }
   }
-
   function updateEsp32Status() {
     const now = Date.now();
     if (lastEsp32Ts === 0) {
-      dotEsp32.classList.remove("dot-green", "dot-red");
+      dotEsp32.classList.remove("dot-green","dot-red");
       dotEsp32.classList.add("dot-amber");
-      labelEsp32.textContent = "Sin datos recientes";
+      labelEsp32.textContent = "Sin actualización reciente";
     } else if (now - lastEsp32Ts < 15000) {
-      dotEsp32.classList.remove("dot-amber", "dot-red");
+      dotEsp32.classList.remove("dot-amber","dot-red");
       dotEsp32.classList.add("dot-green");
-      labelEsp32.textContent = "En línea";
+      labelEsp32.textContent = "ESP32 en línea";
     } else {
       dotEsp32.classList.remove("dot-green");
       dotEsp32.classList.add("dot-amber");
@@ -868,85 +762,72 @@
 
   function addLog(msg) {
     const now = new Date();
-    const hh = String(now.getHours()).padStart(2, "0");
-    const mm = String(now.getMinutes()).padStart(2, "0");
-    const time = `${hh}:${mm}`;
-
+    const hh = String(now.getHours()).padStart(2,"0");
+    const mm = String(now.getMinutes()).padStart(2,"0");
     const div = document.createElement("div");
     div.className = "log-entry";
-    div.innerHTML = `<div class="log-time">${time}</div><div class="log-msg">${msg}</div>`;
+    div.innerHTML = `<div class="log-time">${hh}:${mm}</div><div class="log-msg">${msg}</div>`;
     logContainer.prepend(div);
-    const maxEntries = 80;
-    while (logContainer.children.length > maxEntries) {
+    while (logContainer.children.length > 80) {
       logContainer.removeChild(logContainer.lastChild);
     }
   }
 
-  // ================== MQTT ==================
+  // MQTT
   function connectMqtt() {
-    const clientId = "HMI-Web-" + Math.random().toString(16).substr(2, 8);
+    const clientId = "HMI-Web-" + Math.random().toString(16).slice(2,10);
     mqttClient = mqtt.connect(MQTT_BROKER_URL, {
       clientId,
-      clean: true,
-      reconnectPeriod: 3000,
-      connectTimeout: 4000
+      clean:true,
+      reconnectPeriod:3000,
+      connectTimeout:4000
     });
 
     mqttClient.on("connect", () => {
       setMqttStatus(true);
       addLog("Conectado al broker MQTT.");
-      mqttClient.subscribe(MQTT_TOPIC_STATE, (err) => {
-        if (!err) {
-          addLog("Suscrito a riego/estado.");
-        }
+      mqttClient.subscribe(MQTT_TOPIC_STATE, err => {
+        if (!err) addLog("Suscrito a riego/estado.");
       });
     });
-
     mqttClient.on("reconnect", () => {
       setMqttStatus(false);
-      addLog("Reintentando conexión MQTT...");
+      addLog("Reintentando conexión MQTT…");
     });
-
-    mqttClient.on("close", () => {
-      setMqttStatus(false);
-    });
-
-    mqttClient.on("error", (err) => {
+    mqttClient.on("close", () => setMqttStatus(false));
+    mqttClient.on("error", err => {
       setMqttStatus(false);
       console.error("MQTT error:", err);
     });
 
-    mqttClient.on("message", (topic, payload) => {
+    mqttClient.on("message", (topic,payload) => {
       if (topic === MQTT_TOPIC_STATE) {
         try {
-          const text = new TextDecoder().decode(payload);
-          const data = JSON.parse(text);
+          const txt = new TextDecoder().decode(payload);
+          const data = JSON.parse(txt);
           lastEsp32Ts = Date.now();
           lastState = data;
           updateUiFromState(data);
           addLog("Mensaje recibido en riego/estado.");
-        } catch (e) {
+        } catch(e) {
           console.error("Error parseando estado:", e);
         }
       }
     });
   }
-
   function publishCmd(obj) {
     if (!mqttClient || !mqttClient.connected) return;
     const payload = JSON.stringify(obj);
     mqttClient.publish(MQTT_TOPIC_CMD, payload);
-    addLog(`CMD → ${payload}`);
+    addLog("CMD → " + payload);
   }
 
-  // ================== ACTUALIZAR UI ESTADO ==================
+  // UI desde estado
   function updateUiFromState(s) {
-    // Control
     controlEnabled = !!s.systemOn;
     currentMode = (s.mode || "MANUAL").toUpperCase();
     setControlStatus();
 
-    // Valores
     const tair = s.tair ?? NaN;
     const rh   = s.rh   ?? NaN;
     const vpd  = s.vpd  ?? NaN;
@@ -955,218 +836,168 @@
 
     if (!isNaN(tair)) {
       tairValue.textContent = tair.toFixed(1);
-      let tag = "Rango óptimo";
-      let cls = "";
-      if (tair < 18 || tair > 30) { tag = "Fuera de rango"; cls = "bad"; }
-      else if (tair < 20 || tair > 28) { tag = "En el límite"; cls = "warn"; }
-      tairTag.textContent = tag;
-      tairTag.className = "metric-tag " + cls;
+      let tag="Rango óptimo", cls="";
+      if (tair<18 || tair>30) { tag="Fuera de rango"; cls="bad"; }
+      else if (tair<20 || tair>28) { tag="En el límite"; cls="warn"; }
+      tairTag.textContent=tag; tairTag.className="metric-tag "+cls;
     }
-
     if (!isNaN(rh)) {
       rhValue.textContent = rh.toFixed(0);
-      let tag = "En banda";
-      let cls = "";
-      if (rh < 40 || rh > 80) { tag = "Fuera de banda"; cls = "bad"; }
-      else if (rh < 45 || rh > 70) { tag = "Cercano al límite"; cls = "warn"; }
-      rhTag.textContent = tag;
-      rhTag.className = "metric-tag " + cls;
+      let tag="En banda", cls="";
+      if (rh<40 || rh>80) { tag="Fuera de banda"; cls="bad"; }
+      else if (rh<45 || rh>70) { tag="Fuera de banda"; cls="warn"; }
+      rhTag.textContent=tag; rhTag.className="metric-tag "+cls;
     }
-
     if (!isNaN(vpd)) {
       vpdValue.textContent = vpd.toFixed(2);
-      let tag = "Banda óptima";
-      let cls = "";
-      if (vpd < 0.3 || vpd > 1.5) { tag = "Fuera de banda"; cls = "bad"; }
-      else if (vpd < 0.6 || vpd > 1.2) { tag = "Cercano al límite"; cls = "warn"; }
-      vpdTag.textContent = tag;
-      vpdTag.className = "metric-tag " + cls;
+      let tag="Banda óptima", cls="";
+      if (vpd<0.3 || vpd>1.5) { tag="Fuera de banda"; cls="bad"; }
+      else if (vpd<0.6 || vpd>1.2) { tag="Cercano al límite"; cls="warn"; }
+      vpdTag.textContent=tag; vpdTag.className="metric-tag "+cls;
     }
-
     if (!isNaN(rad)) {
       radValue.textContent = rad.toFixed(0);
-      let tag = "Riego habilitado";
-      let cls = "";
-      if (rad > 60000) { tag = "Radiación alta para riego"; cls = "warn"; }
-      radTag.textContent = tag;
-      radTag.className = "metric-tag " + cls;
+      let tag="Riego habilitado", cls="";
+      if (rad>60000) { tag="Radiación alta para riego"; cls="warn"; }
+      radTag.textContent=tag; radTag.className="metric-tag "+cls;
     }
-
     if (!isNaN(soil1)) {
       soil1Value.textContent = soil1.toFixed(0);
-      let tag = "En banda";
-      let cls = "";
-      if (soil1 < 20) { tag = "Suelo muy seco"; cls = "bad"; }
-      else if (soil1 < 30) { tag = "Suelo seco"; cls = "warn"; }
-      else if (soil1 > 70) { tag = "Suelo muy húmedo"; cls = "bad"; }
-      else if (soil1 > 60) { tag = "Suelo húmedo (alto)"; cls = "warn"; }
-      soil1Tag.textContent = tag;
-      soil1Tag.className = "metric-tag " + cls;
+      let tag="En banda", cls="";
+      if (soil1<20) { tag="Suelo muy seco"; cls="bad"; }
+      else if (soil1<30) { tag="Suelo seco"; cls="warn"; }
+      else if (soil1>70) { tag="Suelo muy húmedo"; cls="bad"; }
+      else if (soil1>60) { tag="Suelo húmedo (alto)"; cls="warn"; }
+      soil1Tag.textContent=tag; soil1Tag.className="metric-tag "+cls;
     }
 
-    // Estado general sencillo
-    let global = "Detenido";
-    let globalCls = "";
-    let globalDesc = "";
-
+    // estado general
+    let global="Detenido", cls="", desc="";
     if (!controlEnabled) {
-      global = "Detenido";
-      globalDesc = "Esperando activación de control.";
-    } else if (currentMode === "MANUAL") {
-      global = "Manual";
-      globalDesc = "Control activado, operación manual.";
+      global="Detenido"; desc="Esperando activación de control.";
+    } else if (currentMode==="MANUAL") {
+      global="Manual"; desc="Control activado, operación manual.";
     } else {
-      global = "Automático";
-      if (!isNaN(soil1) && soil1 < 30) {
-        globalDesc = "Riego probablemente requerido (suelo seco).";
-        globalCls = "warn";
-      } else {
-        globalDesc = "Control automático en banda.";
-        globalCls = "";
-      }
+      global="Automático";
+      if (!isNaN(soil1) && soil1<30) { desc="Riego probablemente requerido (suelo seco)."; cls="warn"; }
+      else desc="Control automático en banda.";
     }
+    globalState.textContent=global;
+    globalTag.textContent = currentMode==="AUTO" ? "Esperando condiciones para riego":"Operación manual";
+    globalTag.className="metric-tag "+cls;
+    globalFooter.textContent=desc;
 
-    globalState.textContent = global;
-    globalTag.textContent = currentMode === "AUTO" ? "Esperando condiciones para riego" : "Operación manual";
-    globalTag.className = "metric-tag " + globalCls;
-    globalFooter.textContent = globalDesc;
+    // Válvula
+    switchS1.checked = !!s.s1;
 
-    // Válvula sector 1
-    const s1 = !!s.s1;
-    switchS1.checked = s1;
+    // setpoints si vienen del ESP32
+    if (typeof s.vpdMin === "number")  spVpdMin.value  = s.vpdMin.toFixed(2);
+    if (typeof s.vpdMax === "number")  spVpdMax.value  = s.vpdMax.toFixed(2);
+    if (typeof s.soilMin=== "number")  spSoilMin.value = s.soilMin.toFixed(0);
+    if (typeof s.soilMax=== "number")  spSoilMax.value = s.soilMax.toFixed(0);
+    if (typeof s.radMax === "number")  spRadMax.value  = s.radMax.toFixed(0);
   }
 
-  // ================== EVENTOS UI ==================
+  // Eventos UI
   btnEnable.addEventListener("click", () => {
-    publishCmd({ type: "CONTROL_ENABLE", value: true });
-    controlEnabled = true;
-    setControlStatus();
+    publishCmd({type:"CONTROL_ENABLE", value:true});
+    controlEnabled=true; setControlStatus();
   });
-
   btnStop.addEventListener("click", () => {
-    publishCmd({ type: "CONTROL_ENABLE", value: false });
-    controlEnabled = false;
-    setControlStatus();
+    publishCmd({type:"CONTROL_ENABLE", value:false});
+    controlEnabled=false; setControlStatus();
     addLog("Paro de emergencia solicitado.");
   });
-
   btnModeManual.addEventListener("click", () => {
-    currentMode = "MANUAL";
+    currentMode="MANUAL";
     btnModeManual.classList.add("active");
     btnModeAuto.classList.remove("active");
-    publishCmd({ type: "MODE", value: "MANUAL" });
+    publishCmd({type:"MODE", value:"MANUAL"});
     setControlStatus();
   });
-
   btnModeAuto.addEventListener("click", () => {
-    currentMode = "AUTO";
+    currentMode="AUTO";
     btnModeAuto.classList.add("active");
     btnModeManual.classList.remove("active");
-    publishCmd({ type: "MODE", value: "AUTO" });
+    publishCmd({type:"MODE", value:"AUTO"});
     setControlStatus();
   });
-
   switchS1.addEventListener("change", () => {
-    const val = switchS1.checked;
-    publishCmd({ type: "VALVE", sector: "s1", value: val });
+    publishCmd({type:"VALVE", sector:"s1", value:switchS1.checked});
   });
-
-  btnClearLog.addEventListener("click", () => {
-    logContainer.innerHTML = "";
-  });
-
+  btnClearLog.addEventListener("click", () => { logContainer.innerHTML=""; });
   btnTestAlarm.addEventListener("click", () => {
-    alarmsLabel.textContent = "Alarma de prueba generada desde HMI.";
-    alarmsLabel.style.color = "#ffcc4d";
+    alarmsLabel.textContent="Alarma de prueba generada desde HMI.";
+    alarmsLabel.style.color="#ffcc4d";
     addLog("Alarma de prueba generada.");
   });
-
   btnAckAlarms.addEventListener("click", () => {
-    alarmsLabel.textContent = "Sin alarmas activas.";
-    alarmsLabel.style.color = "var(--text-soft)";
+    alarmsLabel.textContent="Sin alarmas activas.";
+    alarmsLabel.style.color="var(--text-soft)";
     addLog("Alarmas reconocidas.");
   });
 
-  // ================== CHARTS (HISTÓRICO) ==================
+  // eventos setpoints
+  btnSpVpd.addEventListener("click", () => {
+    const mn=parseFloat(spVpdMin.value), mx=parseFloat(spVpdMax.value);
+    if (!isNaN(mn)) publishCmd({type:"SETPOINT", name:"vpdMin", value:mn});
+    if (!isNaN(mx)) publishCmd({type:"SETPOINT", name:"vpdMax", value:mx});
+  });
+  btnSpSoil.addEventListener("click", () => {
+    const mn=parseFloat(spSoilMin.value), mx=parseFloat(spSoilMax.value);
+    if (!isNaN(mn)) publishCmd({type:"SETPOINT", name:"soilMin", value:mn});
+    if (!isNaN(mx)) publishCmd({type:"SETPOINT", name:"soilMax", value:mx});
+  });
+  btnSpRad.addEventListener("click", () => {
+    const mx=parseFloat(spRadMax.value);
+    if (!isNaN(mx)) publishCmd({type:"SETPOINT", name:"radMax", value:mx});
+  });
+
+  // Charts
   let chartTempHum, chartSoil;
-
   function initCharts() {
-    const ctx1 = document.getElementById("chartTempHum").getContext("2d");
-    const ctx2 = document.getElementById("chartSoil").getContext("2d");
+    const ctx1=document.getElementById("chartTempHum").getContext("2d");
+    const ctx2=document.getElementById("chartSoil").getContext("2d");
 
-    chartTempHum = new Chart(ctx1, {
-      type: "line",
-      data: {
-        labels: [],
-        datasets: [
-          {
-            label: "Temperatura (°C)",
-            data: [],
-            tension: 0.25,
-            borderWidth: 1.6,
-            pointRadius: 0,
-          },
-          {
-            label: "Humedad relativa (%)",
-            data: [],
-            tension: 0.25,
-            borderWidth: 1.2,
-            pointRadius: 0,
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        interaction: { mode: "index", intersect: false },
-        plugins: {
-          legend: { display: true, labels: { color: "#c5cdee", font: { size: 10 } } },
-          tooltip: { enabled: true }
+    chartTempHum = new Chart(ctx1,{
+      type:"line",
+      data:{labels:[], datasets:[
+        {label:"Temperatura (°C)", data:[], tension:0.25, borderWidth:1.6, pointRadius:0},
+        {label:"Humedad relativa (%)", data:[], tension:0.25, borderWidth:1.2, pointRadius:0}
+      ]},
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        interaction:{mode:"index", intersect:false},
+        plugins:{
+          legend:{display:true, labels:{color:"#c5cdee", font:{size:10}}},
+          tooltip:{enabled:true}
         },
-        scales: {
-          x: {
-            ticks: { color: "#7f88a7", maxRotation: 0, font: { size: 9 } },
-            grid: { color: "rgba(65,72,104,0.5)" }
-          },
-          y: {
-            ticks: { color: "#7f88a7", font: { size: 9 } },
-            grid: { color: "rgba(65,72,104,0.4)" }
-          }
+        scales:{
+          x:{ticks:{color:"#7f88a7", maxRotation:0, font:{size:9}},
+             grid:{color:"rgba(65,72,104,0.5)"}},
+          y:{ticks:{color:"#7f88a7", font:{size:9}},
+             grid:{color:"rgba(65,72,104,0.4)"}}
         }
       }
     });
 
-    chartSoil = new Chart(ctx2, {
-      type: "line",
-      data: {
-        labels: [],
-        datasets: [
-          {
-            label: "Humedad suelo (%)",
-            data: [],
-            tension: 0.25,
-            borderWidth: 1.6,
-            pointRadius: 0,
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        interaction: { mode: "index", intersect: false },
-        plugins: {
-          legend: { display: true, labels: { color: "#c5cdee", font: { size: 10 } } },
-          tooltip: { enabled: true }
+    chartSoil = new Chart(ctx2,{
+      type:"line",
+      data:{labels:[], datasets:[
+        {label:"Humedad suelo (%)", data:[], tension:0.25, borderWidth:1.6, pointRadius:0}
+      ]},
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        interaction:{mode:"index", intersect:false},
+        plugins:{
+          legend:{display:true, labels:{color:"#c5cdee", font:{size:10}}},
+          tooltip:{enabled:true}
         },
-        scales: {
-          x: {
-            ticks: { color: "#7f88a7", maxRotation: 0, font: { size: 9 } },
-            grid: { color: "rgba(65,72,104,0.5)" }
-          },
-          y: {
-            ticks: { color: "#7f88a7", font: { size: 9 } },
-            grid: { color: "rgba(65,72,104,0.4)" }
-          }
+        scales:{
+          x:{ticks:{color:"#7f88a7", maxRotation:0, font:{size:9}},
+             grid:{color:"rgba(65,72,104,0.5)"}},
+          y:{ticks:{color:"#7f88a7", font:{size:9}},
+             grid:{color:"rgba(65,72,104,0.4)"}}
         }
       }
     });
@@ -1179,14 +1010,19 @@
         return;
       }
       const resp = await fetch(`${HISTORY_API_BASE}/api/historial?dias=${days}`);
-      if (!resp.ok) throw new Error("HTTP " + resp.status);
-      const data = await resp.json();
+      if (!resp.ok) throw new Error("HTTP "+resp.status);
+      const json = await resp.json();
+
+      let data;
+      if (Array.isArray(json)) data = json;
+      else if (Array.isArray(json.rows)) data = json.rows;
+      else if (Array.isArray(json.data)) data = json.data;
+      else throw new Error("Formato inesperado de la respuesta");
 
       const labels = data.map(r => {
-        const d = new Date(r.ts);
+        const d=new Date(r.ts);
         return `${d.getDate()}/${d.getMonth()+1} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
       });
-
       const temp = data.map(r => r.tair);
       const hum  = data.map(r => r.rh);
       const soil = data.map(r => r.soil1);
@@ -1201,12 +1037,11 @@
       chartSoil.update("none");
 
       addLog(`Histórico cargado (${days} día(s), ${data.length} muestras).`);
-    } catch (e) {
+    } catch(e) {
       console.error("Error cargando histórico:", e);
-      addLog("Error al cargar histórico: " + e.message);
+      addLog("Error al cargar histórico: "+e.message);
     }
   }
-
   btnRange24h.addEventListener("click", () => {
     btnRange24h.classList.add("active");
     btnRange3d.classList.remove("active");
@@ -1218,15 +1053,15 @@
     loadHistory(3);
   });
 
-  // ================== ARRANQUE ==================
   window.addEventListener("load", () => {
     setControlStatus();
     setMqttStatus(false);
     updateEsp32Status();
     connectMqtt();
     initCharts();
-    loadHistory(1); // por defecto 24 h
+    loadHistory(1);
   });
 </script>
 </body>
 </html>
+
