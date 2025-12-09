@@ -154,6 +154,15 @@
       font-size:10px;
       color:var(--text-soft);
     }
+    .metric-status{
+      font-size:10px;
+      margin-top:1px;
+      color:var(--text-soft);
+    }
+    .metric-status.ok{color:#3cf2a5;}
+    .metric-status.warn{color:#f7b500;}
+    .metric-status.bad{color:#ff4f6b;}
+    .metric-status.info{color:#7fc0ff;}
 
     .status-card{
       margin-top:8px;
@@ -500,21 +509,25 @@
         <div class="metric">
           <div class="metric-label">Humedad relativa</div>
           <div class="metric-value" id="valRh">-- %</div>
+          <div class="metric-status" id="bandRh">Sin datos</div>
           <div class="metric-caption">Objetivo: 40–70 %</div>
         </div>
         <div class="metric">
           <div class="metric-label">Déficit de presión de vapor (VPD)</div>
           <div class="metric-value" id="valVpd">-- kPa</div>
+          <div class="metric-status" id="bandVpd">Sin datos</div>
           <div class="metric-caption">Banda objetivo: 0.6–1.2 kPa</div>
         </div>
         <div class="metric">
           <div class="metric-label">Radiación en copa</div>
           <div class="metric-value" id="valRad">-- lux</div>
+          <div class="metric-status" id="bandRad">Sin datos</div>
           <div class="metric-caption">Límite para riego: &lt; 60 000 lux</div>
         </div>
         <div class="metric">
           <div class="metric-label">Humedad de suelo S1 (sector único)</div>
           <div class="metric-value" id="valSoil1">-- %</div>
+          <div class="metric-status" id="bandSoil1">Sin datos</div>
           <div class="metric-caption">Banda objetivo: 30–60 %</div>
         </div>
         <div class="metric">
@@ -655,6 +668,15 @@
   // Backend para histórico (Render)
   const HISTORY_API_BASE = "https://riego-bridge.onrender.com";
 
+  // Setpoints base
+  const cfgSetpoints = {
+    vpdMin:0.6,
+    vpdMax:1.2,
+    soilMin:30,
+    soilMax:60,
+    radMax:60000
+  };
+
   // ================= ESTADO UI ==================
   let mqttClient = null;
   let mqttConnected = false;
@@ -692,6 +714,11 @@
   const elValSoil1 = $("valSoil1");
   const elValEstado= $("valEstado");
   const elValEstadoDet = $("valEstadoDet");
+
+  const elBandRh   = $("bandRh");
+  const elBandVpd  = $("bandVpd");
+  const elBandRad  = $("bandRad");
+  const elBandSoil1= $("bandSoil1");
 
   const elBtnControlAuto = $("btnControlAuto");
   const elBtnStop        = $("btnStop");
@@ -761,8 +788,7 @@
   function updateEsp32Status(){
     const age = Date.now() - lastStateTs;
     if(lastStateTs === 0){
-      elDotEsp.classList.remove("ok");
-      elDotEsp.classList.remove("warn");
+      elDotEsp.classList.remove("ok","warn");
       elTxtEsp.textContent = "ESP32: Sin actualización reciente";
       return;
     }
@@ -782,6 +808,43 @@
       el.textContent = `-- ${suffix}`.trim();
     }else{
       el.textContent = `${value.toFixed(decimals)} ${suffix}`.trim();
+    }
+  }
+
+  function clearBandClass(el){
+    el.classList.remove("ok","bad","warn","info");
+  }
+
+  function setBandStatus(el, value, min, max){
+    clearBandClass(el);
+    if(typeof value !== "number" || isNaN(value)){
+      el.textContent = "Sin datos";
+      return;
+    }
+    if(value < min){
+      el.textContent = "Por debajo de banda";
+      el.classList.add("warn");
+    }else if(value > max){
+      el.textContent = "Por encima de banda";
+      el.classList.add("bad");
+    }else{
+      el.textContent = "En banda óptima";
+      el.classList.add("ok");
+    }
+  }
+
+  function setRadStatus(el,value,max){
+    clearBandClass(el);
+    if(typeof value !== "number" || isNaN(value)){
+      el.textContent = "Sin datos";
+      return;
+    }
+    if(value < max){
+      el.textContent = "Riego habilitado";
+      el.classList.add("ok");
+    }else{
+      el.textContent = "Riego bloqueado por radiación";
+      el.classList.add("bad");
     }
   }
 
@@ -871,22 +934,43 @@
     setMetric(elValRad,  s.rad,  "lux", 0);
     setMetric(elValSoil1,s.soil1,"%", 0);
 
+    // Actualizar setpoints desde el estado
+    if(typeof s.vpdMin === "number"){
+      cfgSetpoints.vpdMin = s.vpdMin;
+      spVpdMin.value = s.vpdMin.toFixed(2);
+    }
+    if(typeof s.vpdMax === "number"){
+      cfgSetpoints.vpdMax = s.vpdMax;
+      spVpdMax.value = s.vpdMax.toFixed(2);
+    }
+    if(typeof s.soilMin === "number"){
+      cfgSetpoints.soilMin = s.soilMin;
+      spSoilMin.value = s.soilMin.toFixed(0);
+    }
+    if(typeof s.soilMax === "number"){
+      cfgSetpoints.soilMax = s.soilMax;
+      spSoilMax.value = s.soilMax.toFixed(0);
+    }
+    if(typeof s.radMax === "number"){
+      cfgSetpoints.radMax = s.radMax;
+      spRadMax.value = s.radMax.toFixed(0);
+    }
+
+    // Actualizar bandas
+    setBandStatus(elBandRh,   s.rh,   40, 70);
+    setBandStatus(elBandVpd,  s.vpd,  cfgSetpoints.vpdMin, cfgSetpoints.vpdMax);
+    setBandStatus(elBandSoil1,s.soil1,cfgSetpoints.soilMin,cfgSetpoints.soilMax);
+    setRadStatus(elBandRad,   s.rad,  cfgSetpoints.radMax);
+
     if(typeof s.systemOn === "boolean") currentSystemOn = s.systemOn;
     if(typeof s.mode === "string") currentMode = s.mode.toUpperCase();
     setControlStatus();
 
-    // Actualizar estado de válvula
+    // Estado de válvula
     if(typeof s.s1 === "boolean"){
       valve1State = s.s1;
       applyValveUi();
     }
-
-    // Rellenar setpoints si vienen en el JSON
-    if(typeof s.vpdMin === "number") spVpdMin.value = s.vpdMin.toFixed(2);
-    if(typeof s.vpdMax === "number") spVpdMax.value = s.vpdMax.toFixed(2);
-    if(typeof s.soilMin === "number") spSoilMin.value = s.soilMin.toFixed(0);
-    if(typeof s.soilMax === "number") spSoilMax.value = s.soilMax.toFixed(0);
-    if(typeof s.radMax === "number") spRadMax.value  = s.radMax.toFixed(0);
   }
 
   // ============= VÁLVULA UI =====================
@@ -1065,20 +1149,35 @@
   btnSpVpd.addEventListener("click",()=>{
     const min = parseFloat(spVpdMin.value);
     const max = parseFloat(spVpdMax.value);
-    if(!isNaN(min)) publishCmd({type:"SETPOINT",name:"vpdMin",value:min});
-    if(!isNaN(max)) publishCmd({type:"SETPOINT",name:"vpdMax",value:max});
+    if(!isNaN(min)){
+      cfgSetpoints.vpdMin = min;
+      publishCmd({type:"SETPOINT",name:"vpdMin",value:min});
+    }
+    if(!isNaN(max)){
+      cfgSetpoints.vpdMax = max;
+      publishCmd({type:"SETPOINT",name:"vpdMax",value:max});
+    }
   });
 
   btnSpSoil.addEventListener("click",()=>{
     const min = parseFloat(spSoilMin.value);
     const max = parseFloat(spSoilMax.value);
-    if(!isNaN(min)) publishCmd({type:"SETPOINT",name:"soilMin",value:min});
-    if(!isNaN(max)) publishCmd({type:"SETPOINT",name:"soilMax",value:max});
+    if(!isNaN(min)){
+      cfgSetpoints.soilMin = min;
+      publishCmd({type:"SETPOINT",name:"soilMin",value:min});
+    }
+    if(!isNaN(max)){
+      cfgSetpoints.soilMax = max;
+      publishCmd({type:"SETPOINT",name:"soilMax",value:max});
+    }
   });
 
   btnSpRad.addEventListener("click",()=>{
     const max = parseFloat(spRadMax.value);
-    if(!isNaN(max)) publishCmd({type:"SETPOINT",name:"radMax",value:max});
+    if(!isNaN(max)){
+      cfgSetpoints.radMax = max;
+      publishCmd({type:"SETPOINT",name:"radMax",value:max});
+    }
   });
 
   btnRange24h.addEventListener("click",()=>{
@@ -1102,6 +1201,13 @@
     updateEsp32Status();
     connectMqtt();
     initCharts();
+
+    // Inicializar setpoints visuales por defecto
+    spVpdMin.value = cfgSetpoints.vpdMin;
+    spVpdMax.value = cfgSetpoints.vpdMax;
+    spSoilMin.value = cfgSetpoints.soilMin;
+    spSoilMax.value = cfgSetpoints.soilMax;
+    spRadMax.value  = cfgSetpoints.radMax;
 
     currentHistoryDays = 1;
     loadHistory(currentHistoryDays);
