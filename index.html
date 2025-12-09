@@ -5,7 +5,7 @@
   <title>Sistema de Riego Inteligente – Prototipo 1 sector</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- MQTT.js (para WebSocket con EMQX) -->
+  <!-- MQTT.js (WebSocket con EMQX) -->
   <script src="https://unpkg.com/mqtt@4.3.7/dist/mqtt.min.js"></script>
   <!-- Chart.js para gráficas -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -234,66 +234,110 @@
       margin-top:8px;
     }
 
-    .setpoints-block{margin-top:10px;}
-    .card-sub{
-      font-size:11px;
-      color:var(--text-soft);
+    /* --- SETPOINTS (nuevo estilo) --- */
+
+    .setpoints-block{
+      margin-top:12px;
+      padding:8px 10px 6px;
+      border-radius:12px;
+      border:1px solid rgba(52,65,109,0.85);
+      background:rgba(6,10,25,0.85);
     }
-    .setpoints-grid{
-      display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
-      gap:10px;
-      margin-top:8px;
-    }
-    .sp-item{
-      background:var(--bg-card);
-      border-radius:14px;
-      padding:8px 10px 9px;
-      border:1px solid rgba(52,65,109,0.9);
+
+    .setpoints-header{
       display:flex;
-      flex-direction:column;
-      gap:6px;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:6px;
     }
-    .sp-label{
+
+    .card-sub{
       font-size:11px;
       color:var(--text-soft);
       font-weight:500;
     }
+
+    .setpoints-hint{
+      font-size:10px;
+      color:rgba(165,178,217,0.7);
+    }
+
+    .setpoints-grid{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:6px;
+    }
+
+    @media (max-width:1200px){
+      .setpoints-grid{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+      }
+    }
+    @media (max-width:768px){
+      .setpoints-grid{
+        grid-template-columns:1fr;
+      }
+    }
+
+    .sp-item{
+      background:transparent;
+      border-radius:10px;
+      padding:4px 2px;
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+    }
+
+    .sp-label{
+      font-size:11px;
+      color:var(--text-soft);
+    }
+
     .sp-row{
       display:flex;
       align-items:center;
-      gap:6px;
+      gap:4px;
     }
+
     .sp-row input{
-      width:70px;
+      width:64px;
       background:#050814;
-      border-radius:8px;
+      border-radius:9px;
       border:1px solid var(--border-soft);
-      padding:4px 6px;
+      padding:3px 6px;
       color:var(--text-main);
       font-size:11px;
       text-align:center;
     }
+
     .sp-row input:focus{
       outline:none;
       border-color:var(--accent);
       box-shadow:0 0 0 1px rgba(60,242,165,0.5);
     }
+
     .sp-sep{
       font-size:10px;
       color:var(--text-soft);
     }
+
     .sp-btn{
+      margin-left:auto;
       font-size:10px;
-      padding:4px 9px;
+      padding:3px 9px;
       border-radius:999px;
       border:1px solid var(--border-soft);
       background:var(--chip-bg);
       color:var(--text-soft);
       cursor:pointer;
-      white-space:nowrap;
+      display:inline-flex;
+      align-items:center;
+      gap:4px;
     }
-    .sp-btn:hover{background:var(--chip-soft);}
+
+    .sp-btn:hover{
+      background:var(--chip-soft);
+    }
 
     .panel-sector .sector-header{
       display:flex;
@@ -569,18 +613,25 @@
 
       <!-- Banda de setpoints -->
       <div class="setpoints-block">
-        <div class="card-sub">Banda de setpoints (prototipo)</div>
+        <div class="setpoints-header">
+          <span class="card-sub">Banda de setpoints (prototipo)</span>
+          <span class="setpoints-hint">Valores enviados al ESP32 vía MQTT</span>
+        </div>
+
         <div class="setpoints-grid">
+          <!-- VPD -->
           <div class="sp-item">
-            <div class="sp-label">Banda VPD (kPa)</div>
+            <div class="sp-label">VPD (kPa)</div>
             <div class="sp-row">
               <span class="sp-sep">mín</span>
               <input id="spVpdMin" type="number" step="0.05" />
               <span class="sp-sep">máx</span>
               <input id="spVpdMax" type="number" step="0.05" />
-              <button class="sp-btn" id="btnSpVpd">Enviar</button>
+              <button class="sp-btn btn-sm" id="btnSpVpd">Enviar</button>
             </div>
           </div>
+
+          <!-- Humedad de suelo -->
           <div class="sp-item">
             <div class="sp-label">Humedad suelo (%)</div>
             <div class="sp-row">
@@ -588,15 +639,17 @@
               <input id="spSoilMin" type="number" step="1" />
               <span class="sp-sep">máx</span>
               <input id="spSoilMax" type="number" step="1" />
-              <button class="sp-btn" id="btnSpSoil">Enviar</button>
+              <button class="sp-btn btn-sm" id="btnSpSoil">Enviar</button>
             </div>
           </div>
+
+          <!-- Radiación máxima -->
           <div class="sp-item">
             <div class="sp-label">Radiación máx. (lux)</div>
             <div class="sp-row">
               <span class="sp-sep">máx</span>
               <input id="spRadMax" type="number" step="1000" />
-              <button class="sp-btn" id="btnSpRad">Enviar</button>
+              <button class="sp-btn btn-sm" id="btnSpRad">Enviar</button>
             </div>
           </div>
         </div>
