@@ -2,298 +2,279 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Riego Inteligente – Palta Fuerte (Prototipo 1 sector)</title>
+  <title>Sistema de Riego Inteligente – Prototipo 1 sector</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
-    rel="stylesheet"
-  />
+
+  <!-- MQTT.js (para WebSocket con EMQX) -->
+  <script src="https://unpkg.com/mqtt@4.3.7/dist/mqtt.min.js"></script>
+  <!-- Chart.js para gráficas -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
   <style>
     :root {
-      --bg: #050814;
-      --bg-card: #111727;
-      --bg-card-soft: #161d30;
-      --accent: #3cf2a5;
-      --accent-soft: rgba(60, 242, 165, 0.15);
-      --accent-red: #ff4b5c;
-      --accent-red-soft: rgba(255, 75, 92, 0.15);
-      --text-main: #f4f7ff;
-      --text-soft: #a9b2d0;
-      --border-soft: #252c42;
-      --chip-bg: #171f32;
-      --chip-soft: #23314a;
-      --shadow-soft: 0 18px 45px rgba(0, 0, 0, 0.55);
-      --good: #48e39a;
-      --warn: #ffcc4d;
-      --bad: #ff4b5c;
+      --bg-main:#050814;
+      --bg-panel:#0c1020;
+      --bg-card:#10162a;
+      --accent:#3cf2a5;
+      --accent-soft:rgba(60,242,165,0.15);
+      --danger:#ff4f6b;
+      --danger-soft:rgba(255,79,107,0.15);
+      --text-main:#f8fbff;
+      --text-soft:#a5b2d9;
+      --border-soft:#232a45;
+      --chip-bg:#111626;
+      --chip-soft:#1b2237;
     }
-    * { box-sizing: border-box; }
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      background: radial-gradient(circle at top left, #14213b 0, #050814 40%, #01020a 100%);
-      color: var(--text-main);
-      overflow-x: hidden;
+    *{box-sizing:border-box;}
+    html,body{
+      margin:0;
+      padding:0;
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:radial-gradient(circle at top,#151b33 0,#050814 60%);
+      color:var(--text-main);
     }
-    body {
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      padding: 24px;
+    body{padding:18px 22px 28px;}
+    .page{
+      max-width:1400px;
+      margin:0 auto;
     }
-    .app {
-      width: 100%;
-      max-width: 1360px;
-      min-height: 680px;
-      border-radius: 18px;
-      background: radial-gradient(circle at top left, #161e35 0, #070a16 35%, #050814 100%);
-      box-shadow: var(--shadow-soft);
-      padding: 22px 24px 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-      border: 1px solid #20263a;
-    }
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 16px;
-    }
-    .title-block { display:flex; flex-direction:column; gap:4px; }
-    .title {
-      font-size: 18px;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-    .subtitle { font-size: 12px; color: var(--text-soft); }
-    .status-group {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .status-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 12px;
-      border-radius: 999px;
-      background: var(--chip-bg);
-      border: 1px solid var(--border-soft);
-      font-size: 11px;
-      color: var(--text-soft);
-    }
-    .status-dot { width: 9px; height: 9px; border-radius: 50%; }
-    .dot-red   { background: var(--accent-red); box-shadow:0 0 0 4px var(--accent-red-soft); }
-    .dot-amber { background: var(--warn);       box-shadow:0 0 0 4px rgba(255,204,77,0.25); }
-    .dot-green { background: var(--accent);     box-shadow:0 0 0 4px var(--accent-soft); }
-    .status-label-strong { font-weight: 500; color: var(--text-main); }
-
-    main {
-      display:grid;
-      grid-template-columns:1.1fr 1.1fr 1.1fr;
-      gap:14px;
-      align-items:stretch;
-    }
-    .card {
-      background: linear-gradient(135deg, #101626 0, #090e1a 100%);
-      border-radius: 18px;
-      padding: 14px 16px 16px;
-      border: 1px solid var(--border-soft);
-      box-shadow: 0 14px 35px rgba(0, 0, 0, 0.55);
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-      position:relative;
-      overflow:hidden;
-    }
-    .card::before {
-      content:"";
-      position:absolute;
-      inset:-40%;
-      background:radial-gradient(circle at 10% 0, rgba(87,204,255,0.04), transparent 55%);
-      opacity:0.9;
-      pointer-events:none;
-    }
-    .card-header {
+    .top-bar{
       display:flex;
       justify-content:space-between;
-      align-items:baseline;
-      gap:8px;
-      position:relative;
-      z-index:1;
+      align-items:center;
+      margin-bottom:16px;
     }
-    .card-title {
-      font-size:13px;
+    .title-main{
+      font-size:20px;
       font-weight:600;
-      letter-spacing:0.06em;
-      text-transform:uppercase;
+      letter-spacing:.03em;
     }
-    .card-sub { font-size:11px; color:var(--text-soft); }
-    .badge {
-      font-size:10px;
-      padding:3px 8px;
-      border-radius:999px;
-      background:var(--chip-soft);
+    .subtitle{
+      font-size:11px;
       color:var(--text-soft);
+      margin-top:4px;
+    }
+    .status-group{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:4px 9px;
+      border-radius:999px;
+      background:var(--chip-bg);
       border:1px solid var(--border-soft);
-      text-transform:uppercase;
-      letter-spacing:0.06em;
+      font-size:11px;
+      color:var(--text-soft);
+    }
+    .chip-dot{
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background:#535b7a;
+    }
+    .chip-dot.ok{background:var(--accent);}
+    .chip-dot.warn{background:#f7b500;}
+    .chip-dot.err{background:var(--danger);}
+
+    .chip.badge-danger{
+      border-color:var(--danger);
+      background:var(--danger-soft);
+      color:#ffd7df;
+    }
+    .chip.badge-ok{
+      border-color:var(--accent);
+      background:var(--accent-soft);
+      color:#c5ffe4;
     }
 
-    .grid-metrics {
+    .grid-main{
+      display:grid;
+      gap:12px;
+      grid-template-columns:minmax(0,1.1fr) minmax(0,1.3fr) minmax(0,1.1fr);
+      margin-bottom:14px;
+    }
+    .panel{
+      background:var(--bg-panel);
+      border-radius:16px;
+      padding:12px 14px;
+      border:1px solid rgba(255,255,255,0.03);
+      box-shadow:0 16px 40px rgba(0,0,0,0.45);
+    }
+    .panel-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:8px;
+    }
+    .panel-title{
+      font-size:12px;
+      font-weight:600;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+      color:#d2ddff;
+    }
+    .panel-tag{
+      font-size:10px;
+      color:var(--text-soft);
+      padding:2px 7px;
+      border-radius:999px;
+      border:1px solid var(--border-soft);
+      background:#070a16;
+    }
+
+    .metric-grid{
       display:grid;
       grid-template-columns:repeat(2,minmax(0,1fr));
-      gap:10px;
-      z-index:1;
-      position:relative;
+      gap:8px;
+      margin-top:4px;
     }
-    .metric-card {
+    .metric{
       background:var(--bg-card);
       border-radius:14px;
-      padding:9px 9px 10px;
+      padding:8px 9px 8px;
+      border:1px solid rgba(52,65,109,0.85);
+      display:flex;
+      flex-direction:column;
+      gap:3px;
+    }
+    .metric-label{
+      font-size:11px;
+      color:var(--text-soft);
+    }
+    .metric-value{
+      font-size:16px;
+      font-weight:600;
+    }
+    .metric-caption{
+      font-size:10px;
+      color:var(--text-soft);
+    }
+
+    .status-card{
+      margin-top:8px;
+      background:var(--bg-card);
+      border-radius:14px;
+      padding:8px 9px;
       border:1px solid rgba(52,65,109,0.85);
       display:flex;
       flex-direction:column;
       gap:4px;
     }
-    .metric-label { font-size:11px; color:var(--text-soft); }
-    .metric-value-row { display:flex; align-items:baseline; gap:4px; }
-    .metric-value { font-size:19px; font-weight:600; }
-    .metric-unit  { font-size:11px; color:var(--text-soft); }
-    .metric-tag { font-size:10px; color:var(--good); }
-    .metric-tag.warn { color:var(--warn); }
-    .metric-tag.bad  { color:var(--bad); }
-    .metric-footer { font-size:10px; color:var(--text-soft); }
-
-    .pill-small {
+    .status-title{
+      font-size:11px;
+      color:var(--text-soft);
+    }
+    .status-main{
+      font-size:14px;
+      font-weight:600;
+    }
+    .status-caption{
       font-size:10px;
-      padding:3px 8px;
-      border-radius:999px;
-      background:var(--chip-bg);
-      border:1px solid var(--border-soft);
       color:var(--text-soft);
     }
 
-    .btn-pill {
+    .btn{
       border-radius:999px;
       border:1px solid var(--border-soft);
       background:var(--chip-bg);
       color:var(--text-soft);
+      padding:6px 11px;
       font-size:11px;
-      padding:7px 14px;
-      cursor:pointer;
       display:inline-flex;
       align-items:center;
+      justify-content:center;
       gap:6px;
-      transition:all 0.15s ease-out;
+      cursor:pointer;
+      transition:background .15s,border-color .15s,transform .04s;
+      user-select:none;
     }
-    .btn-pill.primary {
+    .btn:hover{background:var(--chip-soft);}
+    .btn:active{transform:scale(.97);}
+    .btn-primary{
       background:var(--accent-soft);
       border-color:var(--accent);
-      color:var(--text-main);
+      color:#c6ffe7;
     }
-    .btn-pill.danger {
-      background:var(--accent-red-soft);
-      border-color:var(--accent-red);
-      color:var(--text-main);
+    .btn-danger{
+      background:var(--danger-soft);
+      border-color:var(--danger);
+      color:#ffe3ea;
     }
-    .btn-pill:hover {
-      transform:translateY(-1px);
-      box-shadow:0 7px 18px rgba(0,0,0,0.4);
+    .btn-sm{
+      padding:4px 9px;
+      font-size:10px;
     }
-
-    .btn-group {
-      display:inline-flex;
-      padding:3px;
-      border-radius:999px;
-      background:var(--chip-bg);
-      border:1px solid var(--border-soft);
+    .btn-toggle{
+      min-width:68px;
     }
-    .btn-toggle {
-      border:none;
-      outline:none;
-      padding:5px 12px;
-      font-size:11px;
-      cursor:pointer;
-      border-radius:999px;
-      background:transparent;
-      color:var(--text-soft);
-      transition:all 0.15s;
-    }
-    .btn-toggle.active {
+    .btn-toggle.active{
       background:var(--accent-soft);
-      color:var(--text-main);
-    }
-    .btn-toggle + .btn-toggle { margin-left:4px; }
-
-    .valve-card {
-      background:var(--bg-card);
-      border-radius:15px;
-      padding:10px 10px 9px;
-      border:1px solid rgba(52,65,109,0.9);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-    }
-    .valve-info { display:flex; flex-direction:column; gap:2px; }
-    .valve-title { font-size:12px; font-weight:500; }
-    .valve-sub { font-size:11px; color:var(--text-soft); }
-
-    .switch { position:relative; width:46px; height:24px; }
-    .switch input { opacity:0; width:0; height:0; }
-    .slider {
-      position:absolute;
-      cursor:pointer;
-      inset:0;
-      background-color:#22293c;
-      transition:0.2s;
-      border-radius:999px;
-      border:1px solid var(--border-soft);
-    }
-    .slider:before {
-      position:absolute;
-      content:"";
-      height:17px; width:17px;
-      left:3px; top:2px;
-      background-color:#ffffff;
-      transition:0.2s;
-      border-radius:50%;
-    }
-    input:checked + .slider {
-      background-color:rgba(60,242,165,0.12);
       border-color:var(--accent);
-    }
-    input:checked + .slider:before {
-      transform:translateX(20px);
-      background:var(--accent);
-      box-shadow:0 0 0 5px rgba(60,242,165,0.25);
+      color:#c6ffe7;
     }
 
-    .logs {
-      flex:1;
-      min-height:180px;
-      max-height:220px;
-      overflow-y:auto;
-      margin-top:4px;
-      padding-right:6px;
-      font-size:11px;
-    }
-    .log-entry {
-      padding:3px 0;
-      border-bottom:1px solid rgba(35,45,73,0.8);
+    .row-btns{
       display:flex;
       gap:8px;
+      flex-wrap:wrap;
+      margin-top:8px;
+    }
+
+    .setpoints-block{margin-top:10px;}
+    .card-sub{
+      font-size:11px;
       color:var(--text-soft);
     }
-    .log-time { color:#737fa1; min-width:40px; }
-    .log-msg  { flex:1; }
-
-    .btn-small {
+    .setpoints-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+      gap:10px;
+      margin-top:8px;
+    }
+    .sp-item{
+      background:var(--bg-card);
+      border-radius:14px;
+      padding:8px 10px 9px;
+      border:1px solid rgba(52,65,109,0.9);
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .sp-label{
+      font-size:11px;
+      color:var(--text-soft);
+      font-weight:500;
+    }
+    .sp-row{
+      display:flex;
+      align-items:center;
+      gap:6px;
+    }
+    .sp-row input{
+      width:70px;
+      background:#050814;
+      border-radius:8px;
+      border:1px solid var(--border-soft);
+      padding:4px 6px;
+      color:var(--text-main);
+      font-size:11px;
+      text-align:center;
+    }
+    .sp-row input:focus{
+      outline:none;
+      border-color:var(--accent);
+      box-shadow:0 0 0 1px rgba(60,242,165,0.5);
+    }
+    .sp-sep{
+      font-size:10px;
+      color:var(--text-soft);
+    }
+    .sp-btn{
       font-size:10px;
       padding:4px 9px;
       border-radius:999px;
@@ -301,750 +282,718 @@
       background:var(--chip-bg);
       color:var(--text-soft);
       cursor:pointer;
+      white-space:nowrap;
     }
-    .btn-small:hover { background:var(--chip-soft); }
+    .sp-btn:hover{background:var(--chip-soft);}
 
-    .history-section {
-      margin-top:4px;
-      background:linear-gradient(135deg,#101626 0,#090e1a 100%);
-      border-radius:16px;
-      padding:12px 16px 14px;
-      border:1px solid var(--border-soft);
-      box-shadow:0 14px 35px rgba(0,0,0,0.5);
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-    }
-    .history-header {
+    .panel-sector .sector-header{
       display:flex;
       justify-content:space-between;
-      align-items:baseline;
-      gap:12px;
+      align-items:center;
+      margin-top:4px;
     }
-    .history-title {
+    .sector-title{
       font-size:12px;
-      font-weight:600;
-      letter-spacing:0.08em;
-      text-transform:uppercase;
+      font-weight:500;
     }
-    .history-sub { font-size:11px; color:var(--text-soft); }
-    .history-body {
-      display:grid;
-      grid-template-columns:1.3fr 1.1fr;
-      gap:16px;
-      align-items:stretch;
-      margin-top:4px;
-    }
-    .chart-card {
-      background:var(--bg-card-soft);
-      border-radius:14px;
-      border:1px solid var(--border-soft);
-      padding:9px 10px 10px;
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-      min-height:170px;
-    }
-    .chart-title { font-size:11px; color:var(--text-soft); }
-    .chart-container { position:relative; flex:1; min-height:130px; }
-    canvas { width:100%!important; height:100%!important; }
-
-    /* Setpoints */
-    .setpoints-block {
-  margin-top:10px;
-}
-
-.setpoints-grid {
-  display:grid;
-  /* Se adaptan a pantalla grande / pequeña solos */
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-  gap:10px;
-  margin-top:8px;
-}
-
-.sp-item {
-  background:var(--bg-card);
-  border-radius:14px;
-  padding:8px 10px 9px;
-  border:1px solid rgba(52,65,109,0.9);
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-}
-
-.sp-label {
-  font-size:11px;
-  color:var(--text-soft);
-  font-weight:500;
-}
-
-.sp-row {
-  display:flex;
-  align-items:center;
-  gap:6px;
-}
-
-.sp-row input {
-  width:70px;          /* tamaño fijo, más legible */
-  background:#050814;
-  border-radius:8px;
-  border:1px solid var(--border-soft);
-  padding:4px 6px;
-  color:var(--text-main);
-  font-size:11px;
-  text-align:center;
-}
-
-.sp-row input:focus {
-  outline:none;
-  border-color:var(--accent);
-  box-shadow:0 0 0 1px rgba(60,242,165,0.5);
-}
-
-.sp-sep {
-  font-size:10px;
-  color:var(--text-soft);
-}
-
-.sp-btn {
-  font-size:10px;
-  padding:4px 9px;
-  border-radius:999px;
-  border:1px solid var(--border-soft);
-  background:var(--chip-bg);
-  color:var(--text-soft);
-  cursor:pointer;
-  white-space:nowrap;
-}
-
-.sp-btn:hover {
-  background:var(--chip-soft);
-}
-
-
-    footer {
-      margin-top:4px;
+    .sector-caption{
       font-size:10px;
       color:var(--text-soft);
+    }
+    .sector-card{
+      margin-top:8px;
+      background:var(--bg-card);
+      border-radius:14px;
+      padding:8px 10px;
+      border:1px solid rgba(52,65,109,0.9);
       display:flex;
       justify-content:space-between;
+      align-items:center;
+    }
+    .sector-switch{
+      display:flex;
+      align-items:center;
       gap:8px;
     }
+    .switch-pill{
+      width:44px;
+      height:22px;
+      border-radius:999px;
+      background:#060915;
+      border:1px solid var(--border-soft);
+      position:relative;
+      cursor:pointer;
+      transition:background .2s,border-color .2s;
+    }
+    .switch-knob{
+      position:absolute;
+      top:2px;
+      left:3px;
+      width:16px;
+      height:16px;
+      border-radius:50%;
+      background:#b2bedf;
+      transition:left .2s,background .2s;
+    }
+    .switch-pill.on{
+      background:var(--accent-soft);
+      border-color:var(--accent);
+    }
+    .switch-pill.on .switch-knob{
+      left:23px;
+      background:#e8fff7;
+    }
 
-    @media (max-width:1100px) {
-      body { padding:10px; }
-      .app { padding:16px; }
-      main { grid-template-columns:1fr; }
-      .history-body { grid-template-columns:1fr; }
-      .setpoints-grid { grid-template-columns:1fr; }
+    .events-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-top:10px;
+      margin-bottom:4px;
+    }
+    .events-title{
+      font-size:11px;
+      color:var(--text-soft);
+    }
+    .log-box{
+      background:var(--bg-card);
+      border-radius:12px;
+      border:1px solid rgba(52,65,109,0.9);
+      max-height:172px;
+      padding:4px 6px;
+      font-size:10px;
+      overflow-y:auto;
+    }
+    .log-line{
+      display:flex;
+      gap:6px;
+      white-space:nowrap;
+    }
+    .log-time{
+      color:#7a87b4;
+      flex-shrink:0;
+    }
+    .log-text{
+      color:var(--text-soft);
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .panel-bottom{
+      margin-top:10px;
+      background:var(--bg-panel);
+      border-radius:16px;
+      padding:12px 14px 16px;
+      border:1px solid rgba(255,255,255,0.03);
+      box-shadow:0 16px 40px rgba(0,0,0,0.45);
+    }
+    .bottom-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:8px;
+    }
+    .bottom-title{
+      font-size:12px;
+      font-weight:600;
+      letter-spacing:.06em;
+      color:#d2ddff;
+      text-transform:uppercase;
+    }
+    .bottom-sub{
+      font-size:11px;
+      color:var(--text-soft);
+    }
+    .range-switch{
+      display:flex;
+      gap:6px;
+    }
+    .range-btn{
+      padding:3px 8px;
+      font-size:10px;
+      border-radius:999px;
+      border:1px solid var(--border-soft);
+      background:var(--chip-bg);
+      color:var(--text-soft);
+      cursor:pointer;
+    }
+    .range-btn.active{
+      background:var(--accent-soft);
+      border-color:var(--accent);
+      color:#c6ffe7;
+    }
+    .charts-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
+    }
+    .chart-card{
+      background:var(--bg-card);
+      border-radius:14px;
+      padding:8px 10px 10px;
+      border:1px solid rgba(52,65,109,0.9);
+    }
+    .chart-title{
+      font-size:11px;
+      color:var(--text-soft);
+      margin-bottom:4px;
+    }
+
+    @media (max-width:1024px){
+      .grid-main{
+        grid-template-columns:1fr;
+      }
     }
   </style>
 </head>
 <body>
-<div class="app">
-  <header>
-    <div class="title-block">
-      <div class="title">SISTEMA DE RIEGO INTELIGENTE – PALTA FUERTE</div>
+<div class="page">
+  <header class="top-bar">
+    <div>
+      <div class="title-main">SISTEMA DE RIEGO INTELIGENTE – PALTA FUERTE</div>
       <div class="subtitle">Parcela piloto – Prototipo 1 sector (ESP32 + IoT)</div>
     </div>
     <div class="status-group">
-      <div class="status-pill">
-        <span class="status-dot dot-red" id="dotControl"></span>
-        <span class="status-label-strong" id="labelControl">Control detenido</span>
-        <span>Modo actual: <span id="labelMode">Manual</span></span>
+      <div class="chip" id="chipControl">
+        <span class="chip-dot err" id="dotControl"></span>
+        <span id="txtControl">Control detenido</span>
       </div>
-      <div class="status-pill">
-        <span class="status-dot dot-amber" id="dotMqtt"></span>
-        <span>MQTT: <span id="labelMqtt">Conectando al broker MQTT</span></span>
+      <div class="chip" id="chipMode">
+        <span>Modo actual:</span>
+        <strong id="txtMode">Manual</strong>
       </div>
-      <div class="status-pill">
-        <span class="status-dot dot-amber" id="dotEsp32"></span>
-        <span>ESP32: <span id="labelEsp32">Sin actualización reciente</span></span>
+      <div class="chip" id="chipMqtt">
+        <span class="chip-dot" id="dotMqtt"></span>
+        <span>MQTT:</span>
+        <strong id="txtMqtt">Desconectado</strong>
+      </div>
+      <div class="chip" id="chipEsp">
+        <span class="chip-dot" id="dotEsp"></span>
+        <span id="txtEsp">ESP32: Sin actualización reciente</span>
       </div>
     </div>
   </header>
 
-  <main>
-    <!-- MONITOREO -->
-    <section class="card">
-      <div class="card-header">
-        <div>
-          <div class="card-title">Monitoreo en tiempo real</div>
-          <div class="card-sub">Microclima + humedad de suelo</div>
-        </div>
-        <div class="badge">Datos desde ESP32</div>
+  <main class="grid-main">
+    <!-- Panel izquierda: monitoreo -->
+    <section class="panel">
+      <div class="panel-header">
+        <div class="panel-title">Monitoreo en tiempo real</div>
+        <div class="panel-tag">Datos desde ESP32</div>
       </div>
-
-      <div class="grid-metrics">
-        <div class="metric-card">
+      <div class="metric-grid">
+        <div class="metric">
           <div class="metric-label">Temperatura aire</div>
-          <div class="metric-value-row">
-            <div class="metric-value" id="tairValue">--.-</div>
-            <div class="metric-unit">°C</div>
-          </div>
-          <div class="metric-tag" id="tairTag">Sin datos</div>
-          <div class="metric-footer">Rango sugerido: 18–30 °C</div>
+          <div class="metric-value" id="valTair">-- °C</div>
+          <div class="metric-caption">Rango sugerido: 18–30 °C</div>
         </div>
-
-        <div class="metric-card">
+        <div class="metric">
           <div class="metric-label">Humedad relativa</div>
-          <div class="metric-value-row">
-            <div class="metric-value" id="rhValue">--</div>
-            <div class="metric-unit">%</div>
-          </div>
-          <div class="metric-tag" id="rhTag">Sin datos</div>
-          <div class="metric-footer">Objetivo: 40–70 %</div>
+          <div class="metric-value" id="valRh">-- %</div>
+          <div class="metric-caption">Objetivo: 40–70 %</div>
         </div>
-
-        <div class="metric-card">
+        <div class="metric">
           <div class="metric-label">Déficit de presión de vapor (VPD)</div>
-          <div class="metric-value-row">
-            <div class="metric-value" id="vpdValue">--.-</div>
-            <div class="metric-unit">kPa</div>
-          </div>
-          <div class="metric-tag" id="vpdTag">Sin datos</div>
-          <div class="metric-footer">Banda objetivo: 0.6 – 1.2 kPa</div>
+          <div class="metric-value" id="valVpd">-- kPa</div>
+          <div class="metric-caption">Banda objetivo: 0.6–1.2 kPa</div>
         </div>
-
-        <div class="metric-card">
+        <div class="metric">
           <div class="metric-label">Radiación en copa</div>
-          <div class="metric-value-row">
-            <div class="metric-value" id="radValue">--</div>
-            <div class="metric-unit">lux</div>
-          </div>
-          <div class="metric-tag" id="radTag">Sin datos</div>
-          <div class="metric-footer">Límite para riego: &lt; 60 000 lux</div>
+          <div class="metric-value" id="valRad">-- lux</div>
+          <div class="metric-caption">Límite para riego: &lt; 60 000 lux</div>
         </div>
-
-        <div class="metric-card">
+        <div class="metric">
           <div class="metric-label">Humedad de suelo S1 (sector único)</div>
-          <div class="metric-value-row">
-            <div class="metric-value" id="soil1Value">--</div>
-            <div class="metric-unit">%</div>
-          </div>
-          <div class="metric-tag" id="soil1Tag">Sin datos</div>
-          <div class="metric-footer">Banda objetivo: 30–60 %</div>
+          <div class="metric-value" id="valSoil1">-- %</div>
+          <div class="metric-caption">Banda objetivo: 30–60 %</div>
         </div>
-
-        <div class="metric-card">
+        <div class="metric">
           <div class="metric-label">Estado general</div>
-          <div class="metric-value-row">
-            <div class="metric-value" id="globalState">--</div>
-          </div>
-          <div class="metric-tag" id="globalTag">Sin datos</div>
-          <div class="metric-footer" id="globalFooter">Esperando datos del ESP32…</div>
+          <div class="metric-value" id="valEstado">Detenido</div>
+          <div class="metric-caption" id="valEstadoDet">Esperando activación de control.</div>
         </div>
       </div>
     </section>
 
-    <!-- CONTROL PRINCIPAL -->
-    <section class="card">
-      <div class="card-header">
-        <div>
-          <div class="card-title">Control principal</div>
-          <div class="card-sub">Modo de operación + lógica VPD + suelo</div>
+    <!-- Panel central: control principal -->
+    <section class="panel">
+      <div class="panel-header">
+        <div class="panel-title">Control principal</div>
+        <div class="panel-tag">Modo de operación + lógica VPD + suelo</div>
+      </div>
+
+      <div class="row-btns">
+        <button class="btn btn-primary" id="btnControlAuto">Activar control automático</button>
+        <button class="btn btn-danger" id="btnStop">Paro de emergencia</button>
+      </div>
+
+      <div style="margin-top:10px;">
+        <div style="font-size:11px;color:var(--text-soft);margin-bottom:4px;">Selección de modo (global)</div>
+        <div class="row-btns">
+          <button class="btn btn-sm btn-toggle active" id="btnModeManual">Manual</button>
+          <button class="btn btn-sm btn-toggle" id="btnModeAuto">Automático</button>
         </div>
       </div>
 
-      <div style="display:flex; flex-direction:column; gap:10px; z-index:1; position:relative;">
-        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <button class="btn-pill primary" id="btnEnable">Activar control automático</button>
-          <button class="btn-pill danger" id="btnStop">Paro de emergencia</button>
+      <div class="status-card" style="margin-top:10px;">
+        <div class="status-title">Alarmas activas (sensores, VPD y riego)</div>
+        <div class="status-main" id="txtAlarmas">Sin alarmas activas.</div>
+        <div class="row-btns" style="margin-top:6px;">
+          <button class="btn btn-sm" id="btnAlarmTest">Generar alarma de prueba</button>
+          <button class="btn btn-sm" id="btnAlarmAck">Reconocer todas</button>
         </div>
+      </div>
 
-        <div>
-          <div class="card-sub" style="margin-bottom:6px;">Selección de modo (global)</div>
-          <div class="btn-group">
-            <button class="btn-toggle active" id="btnModeManual">Manual</button>
-            <button class="btn-toggle" id="btnModeAuto">Automático</button>
+      <!-- Banda de setpoints -->
+      <div class="setpoints-block">
+        <div class="card-sub">Banda de setpoints (prototipo)</div>
+        <div class="setpoints-grid">
+          <div class="sp-item">
+            <div class="sp-label">Banda VPD (kPa)</div>
+            <div class="sp-row">
+              <span class="sp-sep">mín</span>
+              <input id="spVpdMin" type="number" step="0.05" />
+              <span class="sp-sep">máx</span>
+              <input id="spVpdMax" type="number" step="0.05" />
+              <button class="sp-btn" id="btnSpVpd">Enviar</button>
+            </div>
           </div>
-        </div>
-
-        <div>
-          <div class="card-sub" style="margin-bottom:4px;">Alarmas activas (sensores, VPD y riego)</div>
-          <div class="pill-small" id="alarmsLabel">Sin alarmas activas.</div>
-        </div>
-
-        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <button class="btn-pill" id="btnTestAlarm">Generar alarma de prueba</button>
-          <button class="btn-pill" id="btnAckAlarms">Reconocer todas</button>
-        </div>
-
-        <!-- SETPOINTS -->
-        <div class="setpoints-block">
-          <div class="card-sub">Banda de setpoints (prototipo)</div>
-          <div class="setpoints-grid">
-            <div class="sp-item">
-              <div class="sp-label">Banda VPD (kPa)</div>
-              <div class="sp-row">
-                <input id="spVpdMin" type="number" step="0.05" placeholder="mín" />
-                <span class="sp-sep">–</span>
-                <input id="spVpdMax" type="number" step="0.05" placeholder="máx" />
-                <button class="sp-btn" id="btnSpVpd">Enviar</button>
-              </div>
+          <div class="sp-item">
+            <div class="sp-label">Humedad suelo (%)</div>
+            <div class="sp-row">
+              <span class="sp-sep">mín</span>
+              <input id="spSoilMin" type="number" step="1" />
+              <span class="sp-sep">máx</span>
+              <input id="spSoilMax" type="number" step="1" />
+              <button class="sp-btn" id="btnSpSoil">Enviar</button>
             </div>
-
-            <div class="sp-item">
-              <div class="sp-label">Humedad suelo (%)</div>
-              <div class="sp-row">
-                <input id="spSoilMin" type="number" step="1" placeholder="mín" />
-                <span class="sp-sep">–</span>
-                <input id="spSoilMax" type="number" step="1" placeholder="máx" />
-                <button class="sp-btn" id="btnSpSoil">Enviar</button>
-              </div>
-            </div>
-
-            <div class="sp-item">
-              <div class="sp-label">Radiación máx. (lux)</div>
-              <div class="sp-row">
-                <input id="spRadMax" type="number" step="1000" placeholder="máx" />
-                <button class="sp-btn" id="btnSpRad">Enviar</button>
-              </div>
+          </div>
+          <div class="sp-item">
+            <div class="sp-label">Radiación máx. (lux)</div>
+            <div class="sp-row">
+              <span class="sp-sep">máx</span>
+              <input id="spRadMax" type="number" step="1000" />
+              <button class="sp-btn" id="btnSpRad">Enviar</button>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- CONTROL SECTOR -->
-    <section class="card">
-      <div class="card-header">
-        <div>
-          <div class="card-title">Control de sector</div>
-          <div class="card-sub">Válvula de riego único (Sector 1)</div>
-        </div>
-        <div class="badge">Modo actual: <span id="badgeMode">Manual</span></div>
+    <!-- Panel derecha: control de sector -->
+    <section class="panel panel-sector">
+      <div class="panel-header">
+        <div class="panel-title">Control de sector</div>
+        <div class="panel-tag">Válvula de riego único (Sector 1)</div>
       </div>
 
-      <div style="display:flex; flex-direction:column; gap:10px; z-index:1; position:relative;">
-        <div class="valve-card">
-          <div class="valve-info">
-            <div class="valve-title">Válvula Sector 1</div>
-            <div class="valve-sub">Hilera principal (10 m aprox.)</div>
+      <div class="sector-card">
+        <div>
+          <div class="sector-title">Válvula Sector 1</div>
+          <div class="sector-caption">Hilera principal (10 m aprox.)</div>
+        </div>
+        <div class="sector-switch">
+          <span style="font-size:11px;color:var(--text-soft);" id="txtValve1">OFF</span>
+          <div class="switch-pill" id="switchValve1">
+            <div class="switch-knob"></div>
           </div>
-          <label class="switch">
-            <input type="checkbox" id="valveS1" data-sector="s1" />
-            <span class="slider"></span>
-          </label>
         </div>
+      </div>
 
-        <div class="card-sub" style="margin-top:4px;">Eventos recientes</div>
-        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
-          <button class="btn-small" id="btnClearLog">Limpiar log</button>
-          <span style="font-size:10px; color:var(--text-soft);" id="logHint">Mensajes MQTT y cambios de estado.</span>
-        </div>
-        <div class="logs" id="logContainer"></div>
+      <div class="events-header">
+        <div class="events-title">Eventos recientes</div>
+        <button class="btn btn-sm" id="btnClearLog">Limpiar log</button>
+      </div>
+      <div class="log-box" id="logList"></div>
+      <div style="margin-top:4px;font-size:9px;color:var(--text-soft);text-align:right;">
+        Mensajes MQTT y cambios de estado.
       </div>
     </section>
   </main>
 
-  <!-- HISTÓRICO -->
-  <section class="history-section">
-    <div class="history-header">
+  <!-- Histórico -->
+  <section class="panel-bottom">
+    <div class="bottom-header">
       <div>
-        <div class="history-title">Histórico de variables</div>
-        <div class="history-sub">Últimos días desde Supabase (bridge Node en Render)</div>
+        <div class="bottom-title">Histórico de variables</div>
+        <div class="bottom-sub">Últimos días desde Supabase (bridge Node en Render)</div>
       </div>
-      <div class="btn-group">
-        <button class="btn-toggle active" id="btnRange24h">Últimas 24 h</button>
-        <button class="btn-toggle" id="btnRange3d">Últimos 3 días</button>
+      <div class="range-switch">
+        <button class="range-btn active" id="btnRange24h">Últimas 24 h</button>
+        <button class="range-btn" id="btnRange3d">Últimos 3 días</button>
       </div>
     </div>
-
-    <div class="history-body">
+    <div class="charts-grid">
       <div class="chart-card">
         <div class="chart-title">Temperatura y humedad relativa</div>
-        <div class="chart-container"><canvas id="chartTempHum"></canvas></div>
+        <canvas id="chartTempHum" height="120"></canvas>
       </div>
-
       <div class="chart-card">
         <div class="chart-title">Humedad de suelo (Sector único)</div>
-        <div class="chart-container"><canvas id="chartSoil"></canvas></div>
+        <canvas id="chartSoil" height="120"></canvas>
       </div>
     </div>
   </section>
-
-  <footer>
-    <span>HMI Web – Prototipo piloto 1 sector (90–120 m²).</span>
-    <span>Conectado a ESP32 vía MQTT (riego/estado &amp; riego/cmd) + histórico vía Supabase.</span>
-  </footer>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
 <script>
-  const MQTT_BROKER_URL  = "wss://broker.emqx.io:8084/mqtt";
+  // ================= CONFIG =====================
+  const MQTT_URL = "wss://broker.emqx.io:8084/mqtt";
   const MQTT_TOPIC_STATE = "riego/estado";
   const MQTT_TOPIC_CMD   = "riego/cmd";
 
-  const HISTORY_API_BASE =
-    (location.protocol === "file:" || location.hostname === "localhost")
-      ? "http://localhost:3000"
-      : "https://riego-bridge.onrender.com"; // <-- si tu URL de Render es otra, cámbiala aquí
+  // Backend para histórico (Render)
+  const HISTORY_API_BASE = "https://riego-bridge.onrender.com";
 
+  // ================= ESTADO UI ==================
   let mqttClient = null;
-  let lastEsp32Ts = 0;
-  let controlEnabled = false;
+  let mqttConnected = false;
+  let lastStateTs = 0;
+  const ESP32_STALE_MS = 30000;
+
+  let currentSystemOn = false;
   let currentMode = "MANUAL";
-  let lastState = null;
+  let valve1State = false;
 
-  // DOM
-  const dotControl = document.getElementById("dotControl");
-  const labelControl = document.getElementById("labelControl");
-  const labelMode = document.getElementById("labelMode");
-  const badgeMode = document.getElementById("badgeMode");
-  const dotMqtt = document.getElementById("dotMqtt");
-  const labelMqtt = document.getElementById("labelMqtt");
-  const dotEsp32 = document.getElementById("dotEsp32");
-  const labelEsp32 = document.getElementById("labelEsp32");
+  // Histórico
+  let chartTempHum, chartSoil;
+  let currentHistoryDays = 1;
+  let historyLoading = false;
 
-  const tairValue = document.getElementById("tairValue");
-  const rhValue   = document.getElementById("rhValue");
-  const vpdValue  = document.getElementById("vpdValue");
-  const radValue  = document.getElementById("radValue");
-  const soil1Value= document.getElementById("soil1Value");
+  // ============== DOM HELPERS ===================
+  const $ = (id) => document.getElementById(id);
 
-  const tairTag = document.getElementById("tairTag");
-  const rhTag   = document.getElementById("rhTag");
-  const vpdTag  = document.getElementById("vpdTag");
-  const radTag  = document.getElementById("radTag");
-  const soil1Tag= document.getElementById("soil1Tag");
+  const elChipControl = $("chipControl");
+  const elDotControl  = $("dotControl");
+  const elTxtControl  = $("txtControl");
 
-  const globalState = document.getElementById("globalState");
-  const globalTag   = document.getElementById("globalTag");
-  const globalFooter= document.getElementById("globalFooter");
+  const elChipMode = $("chipMode");
+  const elTxtMode  = $("txtMode");
 
-  const btnEnable = document.getElementById("btnEnable");
-  const btnStop   = document.getElementById("btnStop");
-  const btnModeManual = document.getElementById("btnModeManual");
-  const btnModeAuto   = document.getElementById("btnModeAuto");
+  const elDotMqtt  = $("dotMqtt");
+  const elTxtMqtt  = $("txtMqtt");
 
-  const alarmsLabel = document.getElementById("alarmsLabel");
-  const btnTestAlarm = document.getElementById("btnTestAlarm");
-  const btnAckAlarms = document.getElementById("btnAckAlarms");
+  const elDotEsp   = $("dotEsp");
+  const elTxtEsp   = $("txtEsp");
 
-  const switchS1 = document.getElementById("valveS1");
-  const logContainer = document.getElementById("logContainer");
-  const btnClearLog = document.getElementById("btnClearLog");
+  const elValTair  = $("valTair");
+  const elValRh    = $("valRh");
+  const elValVpd   = $("valVpd");
+  const elValRad   = $("valRad");
+  const elValSoil1 = $("valSoil1");
+  const elValEstado= $("valEstado");
+  const elValEstadoDet = $("valEstadoDet");
 
-  const btnRange24h = document.getElementById("btnRange24h");
-  const btnRange3d  = document.getElementById("btnRange3d");
+  const elBtnControlAuto = $("btnControlAuto");
+  const elBtnStop        = $("btnStop");
+  const elBtnModeManual  = $("btnModeManual");
+  const elBtnModeAuto    = $("btnModeAuto");
 
-  // setpoints inputs
-  const spVpdMin  = document.getElementById("spVpdMin");
-  const spVpdMax  = document.getElementById("spVpdMax");
-  const spSoilMin = document.getElementById("spSoilMin");
-  const spSoilMax = document.getElementById("spSoilMax");
-  const spRadMax  = document.getElementById("spRadMax");
-  const btnSpVpd  = document.getElementById("btnSpVpd");
-  const btnSpSoil = document.getElementById("btnSpSoil");
-  const btnSpRad  = document.getElementById("btnSpRad");
+  const elSwitchValve1   = $("switchValve1");
+  const elTxtValve1      = $("txtValve1");
 
-  function setControlStatus() {
-    if (controlEnabled) {
-      dotControl.classList.remove("dot-red");
-      dotControl.classList.add("dot-green");
-      labelControl.textContent = "Control activo";
-    } else {
-      dotControl.classList.remove("dot-green");
-      dotControl.classList.add("dot-red");
-      labelControl.textContent = "Control detenido";
+  const elLogList        = $("logList");
+
+  const spVpdMin = $("spVpdMin");
+  const spVpdMax = $("spVpdMax");
+  const spSoilMin= $("spSoilMin");
+  const spSoilMax= $("spSoilMax");
+  const spRadMax = $("spRadMax");
+  const btnSpVpd = $("btnSpVpd");
+  const btnSpSoil= $("btnSpSoil");
+  const btnSpRad = $("btnSpRad");
+
+  const btnRange24h = $("btnRange24h");
+  const btnRange3d  = $("btnRange3d");
+
+  // ================== UI STATUS =================
+  function setControlStatus(){
+    if(currentSystemOn){
+      elChipControl.classList.add("badge-ok");
+      elChipControl.classList.remove("badge-danger");
+      elDotControl.classList.add("ok");
+      elDotControl.classList.remove("err");
+      elTxtControl.textContent = "Control en marcha";
+      elValEstado.textContent = "En operación";
+      elValEstadoDet.textContent = "Lógica de control activa.";
+    }else{
+      elChipControl.classList.add("badge-danger");
+      elChipControl.classList.remove("badge-ok");
+      elDotControl.classList.add("err");
+      elDotControl.classList.remove("ok");
+      elTxtControl.textContent = "Control detenido";
+      elValEstado.textContent = "Detenido";
+      elValEstadoDet.textContent = "Esperando activación de control.";
     }
-    labelMode.textContent = currentMode === "AUTO" ? "Automático" : "Manual";
-    badgeMode.textContent = labelMode.textContent;
-  }
-  function setMqttStatus(ok) {
-    if (ok) {
-      dotMqtt.classList.remove("dot-red","dot-amber");
-      dotMqtt.classList.add("dot-green");
-      labelMqtt.textContent = "Conectado al broker MQTT";
-    } else {
-      dotMqtt.classList.remove("dot-green");
-      dotMqtt.classList.add("dot-red");
-      labelMqtt.textContent = "Desconectado";
-    }
-  }
-  function updateEsp32Status() {
-    const now = Date.now();
-    if (lastEsp32Ts === 0) {
-      dotEsp32.classList.remove("dot-green","dot-red");
-      dotEsp32.classList.add("dot-amber");
-      labelEsp32.textContent = "Sin actualización reciente";
-    } else if (now - lastEsp32Ts < 15000) {
-      dotEsp32.classList.remove("dot-amber","dot-red");
-      dotEsp32.classList.add("dot-green");
-      labelEsp32.textContent = "ESP32 en línea";
-    } else {
-      dotEsp32.classList.remove("dot-green");
-      dotEsp32.classList.add("dot-amber");
-      labelEsp32.textContent = "Sin actualización reciente";
+
+    elTxtMode.textContent = currentMode === "AUTO" ? "Automático" : "Manual";
+    if(currentMode === "AUTO"){
+      elBtnModeAuto.classList.add("active");
+      elBtnModeManual.classList.remove("active");
+    }else{
+      elBtnModeManual.classList.add("active");
+      elBtnModeAuto.classList.remove("active");
     }
   }
-  setInterval(updateEsp32Status, 2000);
 
-  function addLog(msg) {
+  function setMqttStatus(ok){
+    mqttConnected = ok;
+    if(ok){
+      elDotMqtt.classList.add("ok");
+      elDotMqtt.classList.remove("err");
+      elTxtMqtt.textContent = "Conectado al broker MQTT";
+    }else{
+      elDotMqtt.classList.remove("ok");
+      elDotMqtt.classList.add("err");
+      elTxtMqtt.textContent = "MQTT desconectado";
+    }
+  }
+
+  function updateEsp32Status(){
+    const age = Date.now() - lastStateTs;
+    if(lastStateTs === 0){
+      elDotEsp.classList.remove("ok");
+      elDotEsp.classList.remove("warn");
+      elTxtEsp.textContent = "ESP32: Sin actualización reciente";
+      return;
+    }
+    if(age < ESP32_STALE_MS){
+      elDotEsp.classList.add("ok");
+      elDotEsp.classList.remove("warn");
+      elTxtEsp.textContent = "ESP32: En línea";
+    }else{
+      elDotEsp.classList.remove("ok");
+      elDotEsp.classList.add("warn");
+      elTxtEsp.textContent = "ESP32: Sin datos recientes";
+    }
+  }
+
+  function setMetric(el, value, suffix = "", decimals = 1){
+    if(typeof value !== "number" || isNaN(value)){
+      el.textContent = `-- ${suffix}`.trim();
+    }else{
+      el.textContent = `${value.toFixed(decimals)} ${suffix}`.trim();
+    }
+  }
+
+  // ================= LOG ========================
+  function addLog(text){
     const now = new Date();
     const hh = String(now.getHours()).padStart(2,"0");
     const mm = String(now.getMinutes()).padStart(2,"0");
-    const div = document.createElement("div");
-    div.className = "log-entry";
-    div.innerHTML = `<div class="log-time">${hh}:${mm}</div><div class="log-msg">${msg}</div>`;
-    logContainer.prepend(div);
-    while (logContainer.children.length > 80) {
-      logContainer.removeChild(logContainer.lastChild);
+    const ss = String(now.getSeconds()).padStart(2,"0");
+    const line = document.createElement("div");
+    line.className = "log-line";
+    const t = document.createElement("span");
+    t.className = "log-time";
+    t.textContent = `${hh}:${mm}:${ss}`;
+    const msg = document.createElement("span");
+    msg.className = "log-text";
+    msg.textContent = text;
+    line.appendChild(t);
+    line.appendChild(msg);
+    elLogList.prepend(line);
+  }
+
+  // ================= MQTT =======================
+  function publishCmd(obj){
+    if(!mqttClient || !mqttConnected) return;
+    try{
+      const payload = JSON.stringify(obj);
+      mqttClient.publish(MQTT_TOPIC_CMD, payload);
+      addLog(`CMD → ${payload}`);
+    }catch(e){
+      console.error("Error publicando CMD:", e);
     }
   }
 
-  // MQTT
-  function connectMqtt() {
-    const clientId = "HMI-Web-" + Math.random().toString(16).slice(2,10);
-    mqttClient = mqtt.connect(MQTT_BROKER_URL, {
-      clientId,
+  function connectMqtt(){
+    addLog("Conectando al broker MQTT...");
+    mqttClient = mqtt.connect(MQTT_URL,{
       clean:true,
-      reconnectPeriod:3000,
-      connectTimeout:4000
+      connectTimeout:4000,
+      reconnectPeriod:4000
     });
 
-    mqttClient.on("connect", () => {
+    mqttClient.on("connect",()=>{
       setMqttStatus(true);
       addLog("Conectado al broker MQTT.");
-      mqttClient.subscribe(MQTT_TOPIC_STATE, err => {
-        if (!err) addLog("Suscrito a riego/estado.");
+      mqttClient.subscribe(MQTT_TOPIC_STATE,(err)=>{
+        if(err) addLog("Error al suscribir a riego/estado.");
+        else addLog("Suscrito a riego/estado.");
       });
     });
-    mqttClient.on("reconnect", () => {
+
+    mqttClient.on("reconnect",()=>{
       setMqttStatus(false);
-      addLog("Reintentando conexión MQTT…");
-    });
-    mqttClient.on("close", () => setMqttStatus(false));
-    mqttClient.on("error", err => {
-      setMqttStatus(false);
-      console.error("MQTT error:", err);
+      addLog("Intentando reconexión MQTT...");
     });
 
-    mqttClient.on("message", (topic,payload) => {
-      if (topic === MQTT_TOPIC_STATE) {
-        try {
-          const txt = new TextDecoder().decode(payload);
-          const data = JSON.parse(txt);
-          lastEsp32Ts = Date.now();
-          lastState = data;
-          updateUiFromState(data);
-          addLog("Mensaje recibido en riego/estado.");
-        } catch(e) {
-          console.error("Error parseando estado:", e);
-        }
+    mqttClient.on("close",()=>{
+      setMqttStatus(false);
+      addLog("MQTT desconectado.");
+    });
+
+    mqttClient.on("error",(err)=>{
+      console.error("MQTT error:", err);
+      addLog("Error MQTT: " + err.message);
+    });
+
+    mqttClient.on("message",(topic,payload)=>{
+      if(topic !== MQTT_TOPIC_STATE) return;
+      try{
+        const txt = payload.toString();
+        const data = JSON.parse(txt);
+        handleStateMessage(data);
+      }catch(e){
+        console.error("Error parseando estado:", e);
+        addLog("Error al parsear mensaje de estado.");
       }
     });
   }
-  function publishCmd(obj) {
-    if (!mqttClient || !mqttClient.connected) return;
-    const payload = JSON.stringify(obj);
-    mqttClient.publish(MQTT_TOPIC_CMD, payload);
-    addLog("CMD → " + payload);
+
+  function handleStateMessage(s){
+    lastStateTs = Date.now();
+    updateEsp32Status();
+
+    setMetric(elValTair, s.tair, "°C", 1);
+    setMetric(elValRh,   s.rh,   "%", 0);
+    setMetric(elValVpd,  s.vpd,  "kPa", 2);
+    setMetric(elValRad,  s.rad,  "lux", 0);
+    setMetric(elValSoil1,s.soil1,"%", 0);
+
+    if(typeof s.systemOn === "boolean") currentSystemOn = s.systemOn;
+    if(typeof s.mode === "string") currentMode = s.mode.toUpperCase();
+    setControlStatus();
+
+    // Actualizar estado de válvula
+    if(typeof s.s1 === "boolean"){
+      valve1State = s.s1;
+      applyValveUi();
+    }
+
+    // Rellenar setpoints si vienen en el JSON
+    if(typeof s.vpdMin === "number") spVpdMin.value = s.vpdMin.toFixed(2);
+    if(typeof s.vpdMax === "number") spVpdMax.value = s.vpdMax.toFixed(2);
+    if(typeof s.soilMin === "number") spSoilMin.value = s.soilMin.toFixed(0);
+    if(typeof s.soilMax === "number") spSoilMax.value = s.soilMax.toFixed(0);
+    if(typeof s.radMax === "number") spRadMax.value  = s.radMax.toFixed(0);
   }
 
-  // UI desde estado
-  function updateUiFromState(s) {
-    controlEnabled = !!s.systemOn;
-    currentMode = (s.mode || "MANUAL").toUpperCase();
-    setControlStatus();
-
-    const tair = s.tair ?? NaN;
-    const rh   = s.rh   ?? NaN;
-    const vpd  = s.vpd  ?? NaN;
-    const rad  = s.rad  ?? NaN;
-    const soil1= s.soil1?? NaN;
-
-    if (!isNaN(tair)) {
-      tairValue.textContent = tair.toFixed(1);
-      let tag="Rango óptimo", cls="";
-      if (tair<18 || tair>30) { tag="Fuera de rango"; cls="bad"; }
-      else if (tair<20 || tair>28) { tag="En el límite"; cls="warn"; }
-      tairTag.textContent=tag; tairTag.className="metric-tag "+cls;
+  // ============= VÁLVULA UI =====================
+  function applyValveUi(){
+    if(valve1State){
+      elSwitchValve1.classList.add("on");
+      elTxtValve1.textContent = "ON";
+    }else{
+      elSwitchValve1.classList.remove("on");
+      elTxtValve1.textContent = "OFF";
     }
-    if (!isNaN(rh)) {
-      rhValue.textContent = rh.toFixed(0);
-      let tag="En banda", cls="";
-      if (rh<40 || rh>80) { tag="Fuera de banda"; cls="bad"; }
-      else if (rh<45 || rh>70) { tag="Fuera de banda"; cls="warn"; }
-      rhTag.textContent=tag; rhTag.className="metric-tag "+cls;
-    }
-    if (!isNaN(vpd)) {
-      vpdValue.textContent = vpd.toFixed(2);
-      let tag="Banda óptima", cls="";
-      if (vpd<0.3 || vpd>1.5) { tag="Fuera de banda"; cls="bad"; }
-      else if (vpd<0.6 || vpd>1.2) { tag="Cercano al límite"; cls="warn"; }
-      vpdTag.textContent=tag; vpdTag.className="metric-tag "+cls;
-    }
-    if (!isNaN(rad)) {
-      radValue.textContent = rad.toFixed(0);
-      let tag="Riego habilitado", cls="";
-      if (rad>60000) { tag="Radiación alta para riego"; cls="warn"; }
-      radTag.textContent=tag; radTag.className="metric-tag "+cls;
-    }
-    if (!isNaN(soil1)) {
-      soil1Value.textContent = soil1.toFixed(0);
-      let tag="En banda", cls="";
-      if (soil1<20) { tag="Suelo muy seco"; cls="bad"; }
-      else if (soil1<30) { tag="Suelo seco"; cls="warn"; }
-      else if (soil1>70) { tag="Suelo muy húmedo"; cls="bad"; }
-      else if (soil1>60) { tag="Suelo húmedo (alto)"; cls="warn"; }
-      soil1Tag.textContent=tag; soil1Tag.className="metric-tag "+cls;
-    }
-
-    // estado general
-    let global="Detenido", cls="", desc="";
-    if (!controlEnabled) {
-      global="Detenido"; desc="Esperando activación de control.";
-    } else if (currentMode==="MANUAL") {
-      global="Manual"; desc="Control activado, operación manual.";
-    } else {
-      global="Automático";
-      if (!isNaN(soil1) && soil1<30) { desc="Riego probablemente requerido (suelo seco)."; cls="warn"; }
-      else desc="Control automático en banda.";
-    }
-    globalState.textContent=global;
-    globalTag.textContent = currentMode==="AUTO" ? "Esperando condiciones para riego":"Operación manual";
-    globalTag.className="metric-tag "+cls;
-    globalFooter.textContent=desc;
-
-    // Válvula
-    switchS1.checked = !!s.s1;
-
-    // setpoints si vienen del ESP32
-    if (typeof s.vpdMin === "number")  spVpdMin.value  = s.vpdMin.toFixed(2);
-    if (typeof s.vpdMax === "number")  spVpdMax.value  = s.vpdMax.toFixed(2);
-    if (typeof s.soilMin=== "number")  spSoilMin.value = s.soilMin.toFixed(0);
-    if (typeof s.soilMax=== "number")  spSoilMax.value = s.soilMax.toFixed(0);
-    if (typeof s.radMax === "number")  spRadMax.value  = s.radMax.toFixed(0);
   }
 
-  // Eventos UI
-  btnEnable.addEventListener("click", () => {
-    publishCmd({type:"CONTROL_ENABLE", value:true});
-    controlEnabled=true; setControlStatus();
-  });
-  btnStop.addEventListener("click", () => {
-    publishCmd({type:"CONTROL_ENABLE", value:false});
-    controlEnabled=false; setControlStatus();
-    addLog("Paro de emergencia solicitado.");
-  });
-  btnModeManual.addEventListener("click", () => {
-    currentMode="MANUAL";
-    btnModeManual.classList.add("active");
-    btnModeAuto.classList.remove("active");
-    publishCmd({type:"MODE", value:"MANUAL"});
-    setControlStatus();
-  });
-  btnModeAuto.addEventListener("click", () => {
-    currentMode="AUTO";
-    btnModeAuto.classList.add("active");
-    btnModeManual.classList.remove("active");
-    publishCmd({type:"MODE", value:"AUTO"});
-    setControlStatus();
-  });
-  switchS1.addEventListener("change", () => {
-    publishCmd({type:"VALVE", sector:"s1", value:switchS1.checked});
-  });
-  btnClearLog.addEventListener("click", () => { logContainer.innerHTML=""; });
-  btnTestAlarm.addEventListener("click", () => {
-    alarmsLabel.textContent="Alarma de prueba generada desde HMI.";
-    alarmsLabel.style.color="#ffcc4d";
-    addLog("Alarma de prueba generada.");
-  });
-  btnAckAlarms.addEventListener("click", () => {
-    alarmsLabel.textContent="Sin alarmas activas.";
-    alarmsLabel.style.color="var(--text-soft)";
-    addLog("Alarmas reconocidas.");
-  });
-
-  // eventos setpoints
-  btnSpVpd.addEventListener("click", () => {
-    const mn=parseFloat(spVpdMin.value), mx=parseFloat(spVpdMax.value);
-    if (!isNaN(mn)) publishCmd({type:"SETPOINT", name:"vpdMin", value:mn});
-    if (!isNaN(mx)) publishCmd({type:"SETPOINT", name:"vpdMax", value:mx});
-  });
-  btnSpSoil.addEventListener("click", () => {
-    const mn=parseFloat(spSoilMin.value), mx=parseFloat(spSoilMax.value);
-    if (!isNaN(mn)) publishCmd({type:"SETPOINT", name:"soilMin", value:mn});
-    if (!isNaN(mx)) publishCmd({type:"SETPOINT", name:"soilMax", value:mx});
-  });
-  btnSpRad.addEventListener("click", () => {
-    const mx=parseFloat(spRadMax.value);
-    if (!isNaN(mx)) publishCmd({type:"SETPOINT", name:"radMax", value:mx});
-  });
-
-  // Charts
-  let chartTempHum, chartSoil;
-  function initCharts() {
-    const ctx1=document.getElementById("chartTempHum").getContext("2d");
-    const ctx2=document.getElementById("chartSoil").getContext("2d");
+  // ============= HISTÓRICO (Chart.js) ==========
+  function initCharts(){
+    const ctx1 = $("chartTempHum").getContext("2d");
+    const ctx2 = $("chartSoil").getContext("2d");
 
     chartTempHum = new Chart(ctx1,{
       type:"line",
-      data:{labels:[], datasets:[
-        {label:"Temperatura (°C)", data:[], tension:0.25, borderWidth:1.6, pointRadius:0},
-        {label:"Humedad relativa (%)", data:[], tension:0.25, borderWidth:1.2, pointRadius:0}
-      ]},
+      data:{
+        labels:[],
+        datasets:[
+          {
+            label:"Temperatura (°C)",
+            data:[],
+            borderColor:"rgba(60,242,165,1)",
+            backgroundColor:"rgba(60,242,165,0.12)",
+            borderWidth:1.4,
+            tension:0.25,
+            pointRadius:0
+          },
+          {
+            label:"Humedad relativa (%)",
+            data:[],
+            borderColor:"rgba(255,115,179,1)",
+            backgroundColor:"rgba(255,115,179,0.12)",
+            borderWidth:1.4,
+            tension:0.25,
+            pointRadius:0
+          }
+        ]
+      },
       options:{
-        responsive:true, maintainAspectRatio:false,
-        interaction:{mode:"index", intersect:false},
+        responsive:true,
+        maintainAspectRatio:false,
         plugins:{
-          legend:{display:true, labels:{color:"#c5cdee", font:{size:10}}},
-          tooltip:{enabled:true}
+          legend:{labels:{color:"#cfd5ff",font:{size:10}}},
+          tooltip:{mode:"index",intersect:false}
         },
+        interaction:{mode:"index",intersect:false},
         scales:{
-          x:{ticks:{color:"#7f88a7", maxRotation:0, font:{size:9}},
-             grid:{color:"rgba(65,72,104,0.5)"}},
-          y:{ticks:{color:"#7f88a7", font:{size:9}},
-             grid:{color:"rgba(65,72,104,0.4)"}}
+          x:{ticks:{color:"#8d98c9",maxTicksLimit:8,font:{size:9}},
+             grid:{color:"rgba(69,76,120,0.3)"}},
+          y:{ticks:{color:"#8d98c9",font:{size:9}},
+             grid:{color:"rgba(69,76,120,0.25)"}}
         }
       }
     });
 
     chartSoil = new Chart(ctx2,{
       type:"line",
-      data:{labels:[], datasets:[
-        {label:"Humedad suelo (%)", data:[], tension:0.25, borderWidth:1.6, pointRadius:0}
-      ]},
+      data:{
+        labels:[],
+        datasets:[{
+          label:"Humedad suelo (%)",
+          data:[],
+          borderColor:"rgba(104,181,255,1)",
+          backgroundColor:"rgba(104,181,255,0.12)",
+          borderWidth:1.4,
+          tension:0.25,
+          pointRadius:0
+        }]
+      },
       options:{
-        responsive:true, maintainAspectRatio:false,
-        interaction:{mode:"index", intersect:false},
+        responsive:true,
+        maintainAspectRatio:false,
         plugins:{
-          legend:{display:true, labels:{color:"#c5cdee", font:{size:10}}},
-          tooltip:{enabled:true}
+          legend:{labels:{color:"#cfd5ff",font:{size:10}}},
+          tooltip:{mode:"index",intersect:false}
         },
+        interaction:{mode:"index",intersect:false},
         scales:{
-          x:{ticks:{color:"#7f88a7", maxRotation:0, font:{size:9}},
-             grid:{color:"rgba(65,72,104,0.5)"}},
-          y:{ticks:{color:"#7f88a7", font:{size:9}},
-             grid:{color:"rgba(65,72,104,0.4)"}}
+          x:{ticks:{color:"#8d98c9",maxTicksLimit:8,font:{size:9}},
+             grid:{color:"rgba(69,76,120,0.3)"}},
+          y:{ticks:{color:"#8d98c9",font:{size:9}},
+             grid:{color:"rgba(69,76,120,0.25)"}}
         }
       }
     });
   }
 
-  async function loadHistory(days) {
-    try {
-      if (!HISTORY_API_BASE || HISTORY_API_BASE.includes("TU_BACKEND_URL")) {
+  async function loadHistory(days){
+    if(historyLoading) return;
+    historyLoading = true;
+
+    try{
+      if(!HISTORY_API_BASE){
         addLog("Histórico no configurado (URL backend).");
         return;
       }
       const resp = await fetch(`${HISTORY_API_BASE}/api/historial?dias=${days}`);
-      if (!resp.ok) throw new Error("HTTP "+resp.status);
+      if(!resp.ok) throw new Error("HTTP " + resp.status);
       const json = await resp.json();
 
       let data;
-      if (Array.isArray(json)) data = json;
-      else if (Array.isArray(json.rows)) data = json.rows;
-      else if (Array.isArray(json.data)) data = json.data;
-      else throw new Error("Formato inesperado de la respuesta");
+      if(Array.isArray(json)) data = json;
+      else if(Array.isArray(json.rows)) data = json.rows;
+      else if(Array.isArray(json.data)) data = json.data;
+      else throw new Error("Formato inesperado de historial");
 
-      const labels = data.map(r => {
-        const d=new Date(r.ts);
+      const labels = data.map(r=>{
+        const d = new Date(r.ts);
         return `${d.getDate()}/${d.getMonth()+1} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
       });
+
       const temp = data.map(r => r.tair);
       const hum  = data.map(r => r.rh);
       const soil = data.map(r => r.soil1);
@@ -1059,32 +1008,105 @@
       chartSoil.update("none");
 
       addLog(`Histórico cargado (${days} día(s), ${data.length} muestras).`);
-    } catch(e) {
+    }catch(e){
       console.error("Error cargando histórico:", e);
-      addLog("Error al cargar histórico: "+e.message);
+      addLog("Error al cargar histórico: " + e.message);
+    }finally{
+      historyLoading = false;
     }
   }
-  btnRange24h.addEventListener("click", () => {
-    btnRange24h.classList.add("active");
-    btnRange3d.classList.remove("active");
-    loadHistory(1);
-  });
-  btnRange3d.addEventListener("click", () => {
-    btnRange3d.classList.add("active");
-    btnRange24h.classList.remove("active");
-    loadHistory(3);
+
+  // ================= EVENTOS UI =================
+  elBtnControlAuto.addEventListener("click",()=>{
+    publishCmd({type:"CONTROL_ENABLE",value:true});
+    publishCmd({type:"MODE",value:"AUTO"});
+    currentSystemOn = true;
+    currentMode = "AUTO";
+    setControlStatus();
   });
 
-  window.addEventListener("load", () => {
+  elBtnStop.addEventListener("click",()=>{
+    publishCmd({type:"CONTROL_ENABLE",value:false});
+    currentSystemOn = false;
+    setControlStatus();
+  });
+
+  elBtnModeManual.addEventListener("click",()=>{
+    publishCmd({type:"MODE",value:"MANUAL"});
+    currentMode = "MANUAL";
+    setControlStatus();
+  });
+
+  elBtnModeAuto.addEventListener("click",()=>{
+    publishCmd({type:"MODE",value:"AUTO"});
+    currentMode = "AUTO";
+    setControlStatus();
+  });
+
+  elSwitchValve1.addEventListener("click",()=>{
+    valve1State = !valve1State;
+    publishCmd({type:"VALVE",sector:"s1",value:valve1State});
+    applyValveUi();
+  });
+
+  $("btnClearLog").addEventListener("click",()=>{
+    elLogList.innerHTML = "";
+  });
+
+  btnSpVpd.addEventListener("click",()=>{
+    const min = parseFloat(spVpdMin.value);
+    const max = parseFloat(spVpdMax.value);
+    if(!isNaN(min)) publishCmd({type:"SETPOINT",name:"vpdMin",value:min});
+    if(!isNaN(max)) publishCmd({type:"SETPOINT",name:"vpdMax",value:max});
+  });
+
+  btnSpSoil.addEventListener("click",()=>{
+    const min = parseFloat(spSoilMin.value);
+    const max = parseFloat(spSoilMax.value);
+    if(!isNaN(min)) publishCmd({type:"SETPOINT",name:"soilMin",value:min});
+    if(!isNaN(max)) publishCmd({type:"SETPOINT",name:"soilMax",value:max});
+  });
+
+  btnSpRad.addEventListener("click",()=>{
+    const max = parseFloat(spRadMax.value);
+    if(!isNaN(max)) publishCmd({type:"SETPOINT",name:"radMax",value:max});
+  });
+
+  btnRange24h.addEventListener("click",()=>{
+    btnRange24h.classList.add("active");
+    btnRange3d.classList.remove("active");
+    currentHistoryDays = 1;
+    loadHistory(currentHistoryDays);
+  });
+
+  btnRange3d.addEventListener("click",()=>{
+    btnRange3d.classList.add("active");
+    btnRange24h.classList.remove("active");
+    currentHistoryDays = 3;
+    loadHistory(currentHistoryDays);
+  });
+
+  // ======== ARRANQUE ============================
+  window.addEventListener("load",()=>{
     setControlStatus();
     setMqttStatus(false);
     updateEsp32Status();
     connectMqtt();
     initCharts();
-    loadHistory(1);
+
+    currentHistoryDays = 1;
+    loadHistory(currentHistoryDays);
+
+    // refrescar histórico automáticamente cada 30 s
+    setInterval(()=>{
+      if(document.visibilityState === "visible"){
+        loadHistory(currentHistoryDays);
+      }
+    },30000);
+
+    // revisar estado ESP32 cada 5 s
+    setInterval(updateEsp32Status,5000);
   });
 </script>
 </body>
 </html>
-
-
