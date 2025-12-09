@@ -234,109 +234,74 @@
       margin-top:8px;
     }
 
-    /* --- SETPOINTS (nuevo estilo) --- */
-
+    /* --- SETPOINTS estilo + / - --- */
     .setpoints-block{
       margin-top:12px;
-      padding:8px 10px 6px;
+      padding:8px 12px 10px;
       border-radius:12px;
       border:1px solid rgba(52,65,109,0.85);
       background:rgba(6,10,25,0.85);
     }
-
-    .setpoints-header{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      margin-bottom:6px;
-    }
-
-    .card-sub{
+    .setpoints-title{
       font-size:11px;
       color:var(--text-soft);
       font-weight:500;
+      margin-bottom:4px;
     }
-
     .setpoints-hint{
       font-size:10px;
       color:rgba(165,178,217,0.7);
+      margin-bottom:6px;
     }
-
-    .setpoints-grid{
-      display:grid;
-      grid-template-columns:repeat(3,minmax(0,1fr));
-      gap:6px;
-    }
-
-    @media (max-width:1200px){
-      .setpoints-grid{
-        grid-template-columns:repeat(2,minmax(0,1fr));
-      }
-    }
-    @media (max-width:768px){
-      .setpoints-grid{
-        grid-template-columns:1fr;
-      }
-    }
-
-    .sp-item{
-      background:transparent;
-      border-radius:10px;
-      padding:4px 2px;
+    .sp-line{
       display:flex;
-      flex-direction:column;
-      gap:4px;
+      align-items:center;
+      justify-content:space-between;
+      margin-top:6px;
+      gap:8px;
     }
-
-    .sp-label{
+    .sp-line-label{
       font-size:11px;
       color:var(--text-soft);
     }
-
-    .sp-row{
+    .sp-line-controls{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .sp-group{
       display:flex;
       align-items:center;
       gap:4px;
     }
-
-    .sp-row input{
-      width:64px;
-      background:#050814;
-      border-radius:9px;
-      border:1px solid var(--border-soft);
-      padding:3px 6px;
-      color:var(--text-main);
-      font-size:11px;
-      text-align:center;
-    }
-
-    .sp-row input:focus{
-      outline:none;
-      border-color:var(--accent);
-      box-shadow:0 0 0 1px rgba(60,242,165,0.5);
-    }
-
-    .sp-sep{
-      font-size:10px;
-      color:var(--text-soft);
-    }
-
-    .sp-btn{
-      margin-left:auto;
-      font-size:10px;
-      padding:3px 9px;
+    .sp-step{
+      width:30px;
+      height:30px;
       border-radius:999px;
       border:1px solid var(--border-soft);
       background:var(--chip-bg);
       color:var(--text-soft);
-      cursor:pointer;
-      display:inline-flex;
+      font-size:18px;
+      line-height:1;
+      display:flex;
       align-items:center;
-      gap:4px;
+      justify-content:center;
+      cursor:pointer;
+      padding:0;
     }
-
-    .sp-btn:hover{
+    .sp-step:hover{
       background:var(--chip-soft);
+    }
+    .sp-display{
+      min-width:96px;
+      padding:6px 14px;
+      border-radius:999px;
+      background:#050814;
+      border:1px solid var(--border-soft);
+      font-size:12px;
+      text-align:center;
+      white-space:nowrap;
     }
 
     .panel-sector .sector-header{
@@ -613,43 +578,48 @@
 
       <!-- Banda de setpoints -->
       <div class="setpoints-block">
-        <div class="setpoints-header">
-          <span class="card-sub">Banda de setpoints (prototipo)</span>
-          <span class="setpoints-hint">Valores enviados al ESP32 vía MQTT</span>
+        <div class="setpoints-title">Banda de setpoints (prototipo)</div>
+        <div class="setpoints-hint">Ajuste fino de VPD, humedad de suelo y radiación máxima para riego.</div>
+
+        <div class="sp-line">
+          <div class="sp-line-label">Banda VPD (mín / máx)</div>
+          <div class="sp-line-controls">
+            <div class="sp-group">
+              <button class="sp-step" data-id="vpdMin" data-dir="minus">−</button>
+              <div class="sp-display" id="dispVpdMin">0.60 kPa</div>
+              <button class="sp-step" data-id="vpdMin" data-dir="plus">+</button>
+            </div>
+            <div class="sp-group">
+              <button class="sp-step" data-id="vpdMax" data-dir="minus">−</button>
+              <div class="sp-display" id="dispVpdMax">1.20 kPa</div>
+              <button class="sp-step" data-id="vpdMax" data-dir="plus">+</button>
+            </div>
+          </div>
         </div>
 
-        <div class="setpoints-grid">
-          <!-- VPD -->
-          <div class="sp-item">
-            <div class="sp-label">VPD (kPa)</div>
-            <div class="sp-row">
-              <span class="sp-sep">mín</span>
-              <input id="spVpdMin" type="number" step="0.05" />
-              <span class="sp-sep">máx</span>
-              <input id="spVpdMax" type="number" step="0.05" />
-              <button class="sp-btn btn-sm" id="btnSpVpd">Enviar</button>
+        <div class="sp-line">
+          <div class="sp-line-label">Humedad suelo (mín / máx)</div>
+          <div class="sp-line-controls">
+            <div class="sp-group">
+              <button class="sp-step" data-id="soilMin" data-dir="minus">−</button>
+              <div class="sp-display" id="dispSoilMin">30 %</div>
+              <button class="sp-step" data-id="soilMin" data-dir="plus">+</button>
+            </div>
+            <div class="sp-group">
+              <button class="sp-step" data-id="soilMax" data-dir="minus">−</button>
+              <div class="sp-display" id="dispSoilMax">60 %</div>
+              <button class="sp-step" data-id="soilMax" data-dir="plus">+</button>
             </div>
           </div>
+        </div>
 
-          <!-- Humedad de suelo -->
-          <div class="sp-item">
-            <div class="sp-label">Humedad suelo (%)</div>
-            <div class="sp-row">
-              <span class="sp-sep">mín</span>
-              <input id="spSoilMin" type="number" step="1" />
-              <span class="sp-sep">máx</span>
-              <input id="spSoilMax" type="number" step="1" />
-              <button class="sp-btn btn-sm" id="btnSpSoil">Enviar</button>
-            </div>
-          </div>
-
-          <!-- Radiación máxima -->
-          <div class="sp-item">
-            <div class="sp-label">Radiación máx. (lux)</div>
-            <div class="sp-row">
-              <span class="sp-sep">máx</span>
-              <input id="spRadMax" type="number" step="1000" />
-              <button class="sp-btn btn-sm" id="btnSpRad">Enviar</button>
+        <div class="sp-line">
+          <div class="sp-line-label">Radiación máxima para riego</div>
+          <div class="sp-line-controls">
+            <div class="sp-group">
+              <button class="sp-step" data-id="radMax" data-dir="minus">−</button>
+              <div class="sp-display" id="dispRadMax">60000 lux</div>
+              <button class="sp-step" data-id="radMax" data-dir="plus">+</button>
             </div>
           </div>
         </div>
@@ -783,14 +753,12 @@
 
   const elLogList        = $("logList");
 
-  const spVpdMin = $("spVpdMin");
-  const spVpdMax = $("spVpdMax");
-  const spSoilMin= $("spSoilMin");
-  const spSoilMax= $("spSoilMax");
-  const spRadMax = $("spRadMax");
-  const btnSpVpd = $("btnSpVpd");
-  const btnSpSoil= $("btnSpSoil");
-  const btnSpRad = $("btnSpRad");
+  // displays setpoints
+  const dispVpdMin  = $("dispVpdMin");
+  const dispVpdMax  = $("dispVpdMax");
+  const dispSoilMin = $("dispSoilMin");
+  const dispSoilMax = $("dispSoilMax");
+  const dispRadMax  = $("dispRadMax");
 
   const btnRange24h = $("btnRange24h");
   const btnRange3d  = $("btnRange3d");
@@ -977,6 +945,62 @@
     });
   }
 
+  // ====== Setpoints UI helpers ======
+  function refreshSetpointDisplays(){
+    dispVpdMin.textContent  = `${cfgSetpoints.vpdMin.toFixed(2)} kPa`;
+    dispVpdMax.textContent  = `${cfgSetpoints.vpdMax.toFixed(2)} kPa`;
+    dispSoilMin.textContent = `${cfgSetpoints.soilMin.toFixed(0)} %`;
+    dispSoilMax.textContent = `${cfgSetpoints.soilMax.toFixed(0)} %`;
+    dispRadMax.textContent  = `${cfgSetpoints.radMax.toFixed(0)} lux`;
+  }
+
+  function clamp(val,min,max){
+    return Math.min(max,Math.max(min,val));
+  }
+
+  function adjustSetpoint(id,dir){
+    const stepMap = {
+      vpdMin:0.05,
+      vpdMax:0.05,
+      soilMin:1,
+      soilMax:1,
+      radMax:1000
+    };
+    const step = stepMap[id] || 1;
+    const sign = dir === "minus" ? -1 : 1;
+    let v = cfgSetpoints[id] + sign*step;
+
+    // límites básicos
+    if(id.startsWith("vpd")){
+      v = clamp(v,0,3);
+    }else if(id.startsWith("soil")){
+      v = clamp(v,0,100);
+    }else if(id === "radMax"){
+      v = clamp(v,1000,100000);
+    }
+
+    cfgSetpoints[id] = +v.toFixed(id.startsWith("vpd") ? 2 : 0);
+
+    // coherencia min/max
+    if(id === "vpdMin" && cfgSetpoints.vpdMin > cfgSetpoints.vpdMax){
+      cfgSetpoints.vpdMin = cfgSetpoints.vpdMax;
+    }
+    if(id === "vpdMax" && cfgSetpoints.vpdMax < cfgSetpoints.vpdMin){
+      cfgSetpoints.vpdMax = cfgSetpoints.vpdMin;
+    }
+    if(id === "soilMin" && cfgSetpoints.soilMin > cfgSetpoints.soilMax){
+      cfgSetpoints.soilMin = cfgSetpoints.soilMax;
+    }
+    if(id === "soilMax" && cfgSetpoints.soilMax < cfgSetpoints.soilMin){
+      cfgSetpoints.soilMax = cfgSetpoints.soilMin;
+    }
+
+    refreshSetpointDisplays();
+
+    // enviar al ESP32
+    publishCmd({type:"SETPOINT",name:id,value:cfgSetpoints[id]});
+  }
+
   function handleStateMessage(s){
     lastStateTs = Date.now();
     updateEsp32Status();
@@ -988,26 +1012,12 @@
     setMetric(elValSoil1,s.soil1,"%", 0);
 
     // Actualizar setpoints desde el estado
-    if(typeof s.vpdMin === "number"){
-      cfgSetpoints.vpdMin = s.vpdMin;
-      spVpdMin.value = s.vpdMin.toFixed(2);
-    }
-    if(typeof s.vpdMax === "number"){
-      cfgSetpoints.vpdMax = s.vpdMax;
-      spVpdMax.value = s.vpdMax.toFixed(2);
-    }
-    if(typeof s.soilMin === "number"){
-      cfgSetpoints.soilMin = s.soilMin;
-      spSoilMin.value = s.soilMin.toFixed(0);
-    }
-    if(typeof s.soilMax === "number"){
-      cfgSetpoints.soilMax = s.soilMax;
-      spSoilMax.value = s.soilMax.toFixed(0);
-    }
-    if(typeof s.radMax === "number"){
-      cfgSetpoints.radMax = s.radMax;
-      spRadMax.value = s.radMax.toFixed(0);
-    }
+    if(typeof s.vpdMin === "number")  cfgSetpoints.vpdMin  = s.vpdMin;
+    if(typeof s.vpdMax === "number")  cfgSetpoints.vpdMax  = s.vpdMax;
+    if(typeof s.soilMin === "number") cfgSetpoints.soilMin = s.soilMin;
+    if(typeof s.soilMax === "number") cfgSetpoints.soilMax = s.soilMax;
+    if(typeof s.radMax === "number")  cfgSetpoints.radMax  = s.radMax;
+    refreshSetpointDisplays();
 
     // Actualizar bandas
     setBandStatus(elBandRh,   s.rh,   40, 70);
@@ -1019,7 +1029,6 @@
     if(typeof s.mode === "string") currentMode = s.mode.toUpperCase();
     setControlStatus();
 
-    // Estado de válvula
     if(typeof s.s1 === "boolean"){
       valve1State = s.s1;
       applyValveUi();
@@ -1199,38 +1208,13 @@
     elLogList.innerHTML = "";
   });
 
-  btnSpVpd.addEventListener("click",()=>{
-    const min = parseFloat(spVpdMin.value);
-    const max = parseFloat(spVpdMax.value);
-    if(!isNaN(min)){
-      cfgSetpoints.vpdMin = min;
-      publishCmd({type:"SETPOINT",name:"vpdMin",value:min});
-    }
-    if(!isNaN(max)){
-      cfgSetpoints.vpdMax = max;
-      publishCmd({type:"SETPOINT",name:"vpdMax",value:max});
-    }
-  });
-
-  btnSpSoil.addEventListener("click",()=>{
-    const min = parseFloat(spSoilMin.value);
-    const max = parseFloat(spSoilMax.value);
-    if(!isNaN(min)){
-      cfgSetpoints.soilMin = min;
-      publishCmd({type:"SETPOINT",name:"soilMin",value:min});
-    }
-    if(!isNaN(max)){
-      cfgSetpoints.soilMax = max;
-      publishCmd({type:"SETPOINT",name:"soilMax",value:max});
-    }
-  });
-
-  btnSpRad.addEventListener("click",()=>{
-    const max = parseFloat(spRadMax.value);
-    if(!isNaN(max)){
-      cfgSetpoints.radMax = max;
-      publishCmd({type:"SETPOINT",name:"radMax",value:max});
-    }
+  // botones de setpoint +/-
+  document.querySelectorAll(".sp-step").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      const id  = btn.dataset.id;
+      const dir = btn.dataset.dir;
+      adjustSetpoint(id,dir);
+    });
   });
 
   btnRange24h.addEventListener("click",()=>{
@@ -1255,12 +1239,8 @@
     connectMqtt();
     initCharts();
 
-    // Inicializar setpoints visuales por defecto
-    spVpdMin.value = cfgSetpoints.vpdMin;
-    spVpdMax.value = cfgSetpoints.vpdMax;
-    spSoilMin.value = cfgSetpoints.soilMin;
-    spSoilMax.value = cfgSetpoints.soilMax;
-    spRadMax.value  = cfgSetpoints.radMax;
+    // mostrar setpoints por defecto
+    refreshSetpointDisplays();
 
     currentHistoryDays = 1;
     loadHistory(currentHistoryDays);
