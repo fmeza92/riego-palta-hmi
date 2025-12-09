@@ -422,16 +422,26 @@
       border-color:var(--accent);
       color:#c6ffe7;
     }
+
     .charts-grid{
       display:grid;
       grid-template-columns:repeat(2,minmax(0,1fr));
       gap:10px;
     }
+    /* Altura fija para que el canvas no crezca infinito */
     .chart-card{
       background:var(--bg-card);
       border-radius:14px;
       padding:8px 10px 10px;
       border:1px solid rgba(52,65,109,0.9);
+      height:230px;
+      display:flex;
+      flex-direction:column;
+    }
+    .chart-card canvas{
+      flex:1;
+      width:100% !important;
+      height:100% !important;
     }
     .chart-title{
       font-size:11px;
@@ -626,11 +636,11 @@
     <div class="charts-grid">
       <div class="chart-card">
         <div class="chart-title">Temperatura y humedad relativa</div>
-        <canvas id="chartTempHum" height="120"></canvas>
+        <canvas id="chartTempHum"></canvas>
       </div>
       <div class="chart-card">
         <div class="chart-title">Humedad de suelo (Sector único)</div>
-        <canvas id="chartSoil" height="120"></canvas>
+        <canvas id="chartSoil"></canvas>
       </div>
     </div>
   </section>
@@ -667,7 +677,6 @@
   const elDotControl  = $("dotControl");
   const elTxtControl  = $("txtControl");
 
-  const elChipMode = $("chipMode");
   const elTxtMode  = $("txtMode");
 
   const elDotMqtt  = $("dotMqtt");
